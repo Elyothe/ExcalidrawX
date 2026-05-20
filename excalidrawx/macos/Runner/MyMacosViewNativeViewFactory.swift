@@ -1,3 +1,11 @@
+//
+//  MyMacosViewNativeViewFactory 2.swift
+//  Runner
+//
+//  Created by Vincenot Eliot on 20/05/2026.
+//
+
+
 import Cocoa
 import FlutterMacOS
 import WebKit
