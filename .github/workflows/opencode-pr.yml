@@ -6,16 +6,23 @@ jobs:
   opencode:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
       contents: read
-      pull-requests: read
-      issues: read
+      pull-requests: write
+      issues: write
     steps:
       - uses: actions/checkout@v6
         with:
-          persist-credentials: false
-      - uses: anomalyco/opencode/github@latest
+          fetch-depth: 0
+      - name: Install opencode
+        run: curl -fsSL https://opencode.ai/install | bash
+      - name: Review PR with opencode
+        run: |
+          export PATH="$HOME/.opencode/bin:$PATH"
+          opencode run -m deepseek/deepseek-v4-flash \
+            "Review this pull request changes:
+            1. Read the git diff
+            2. Check for bugs, code quality issues, security problems
+            3. Post a review comment on the PR"
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-        with:
-          model: deepseek/deepseek-v4-flash
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
