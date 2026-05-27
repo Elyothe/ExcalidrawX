@@ -37,6 +37,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   webview_flutter_wkwebview: ^3.25.1
   macos_ui: ^2.2.2
+  file_picker: ^11.0.2
+  get_it: ^9.2.1
 
 dev_dependencies:
   flutter_test:
