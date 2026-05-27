@@ -22,11 +22,39 @@ class HomeStateMapper extends ClassMapperBase<HomeState> {
   @override
   final String id = 'HomeState';
 
+  static HomeStatus _$status(HomeState v) => v.status;
+  static const Field<HomeState, HomeStatus> _f$status = Field(
+    'status',
+    _$status,
+    opt: true,
+    def: HomeStatus.initial,
+  );
+  static String? _$savedPath(HomeState v) => v.savedPath;
+  static const Field<HomeState, String> _f$savedPath = Field(
+    'savedPath',
+    _$savedPath,
+    opt: true,
+  );
+  static String? _$errorMessage(HomeState v) => v.errorMessage;
+  static const Field<HomeState, String> _f$errorMessage = Field(
+    'errorMessage',
+    _$errorMessage,
+    opt: true,
+  );
+
   @override
-  final MappableFields<HomeState> fields = const {};
+  final MappableFields<HomeState> fields = const {
+    #status: _f$status,
+    #savedPath: _f$savedPath,
+    #errorMessage: _f$errorMessage,
+  };
 
   static HomeState _instantiate(DecodingData data) {
-    return HomeState();
+    return HomeState(
+      status: data.dec(_f$status),
+      savedPath: data.dec(_f$savedPath),
+      errorMessage: data.dec(_f$errorMessage),
+    );
   }
 
   @override
@@ -88,7 +116,7 @@ extension HomeStateValueCopy<$R, $Out> on ObjectCopyWith<$R, HomeState, $Out> {
 
 abstract class HomeStateCopyWith<$R, $In extends HomeState, $Out>
     implements ClassCopyWith<$R, $In, $Out> {
-  $R call();
+  $R call({HomeStatus? status, String? savedPath, String? errorMessage});
   HomeStateCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
 }
 
@@ -101,9 +129,23 @@ class _HomeStateCopyWithImpl<$R, $Out>
   late final ClassMapperBase<HomeState> $mapper =
       HomeStateMapper.ensureInitialized();
   @override
-  $R call() => $apply(FieldCopyWithData({}));
+  $R call({
+    HomeStatus? status,
+    Object? savedPath = $none,
+    Object? errorMessage = $none,
+  }) => $apply(
+    FieldCopyWithData({
+      if (status != null) #status: status,
+      if (savedPath != $none) #savedPath: savedPath,
+      if (errorMessage != $none) #errorMessage: errorMessage,
+    }),
+  );
   @override
-  HomeState $make(CopyWithData data) => HomeState();
+  HomeState $make(CopyWithData data) => HomeState(
+    status: data.get(#status, or: $value.status),
+    savedPath: data.get(#savedPath, or: $value.savedPath),
+    errorMessage: data.get(#errorMessage, or: $value.errorMessage),
+  );
 
   @override
   HomeStateCopyWith<$R2, HomeState, $Out2> $chain<$R2, $Out2>(

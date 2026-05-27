@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:macos_ui/macos_ui.dart';
 
 class MacosLayout extends StatefulWidget {
-  const MacosLayout({super.key});
+  final VoidCallback onSave;
+
+  const MacosLayout({super.key, required this.onSave});
 
   @override
   State<MacosLayout> createState() => _MacosLayout();
@@ -31,6 +33,14 @@ class _MacosLayout extends State<MacosLayout> {
             ],
           );
         },
+        bottom: Padding(
+          padding: const EdgeInsets.all(16),
+          child: PushButton(
+            controlSize: ControlSize.large,
+            child: const Text('Enregistrer'),
+            onPressed: () => widget.onSave(),
+          ),
+        ),
       ),
       endSidebar: Sidebar(
         startWidth: 200,
@@ -51,8 +61,6 @@ class _MacosLayout extends State<MacosLayout> {
     switch (index) {
       case 0:
         return const Center(child: Text('Page One Content'));
-      case 1:
-        return const Center(child: Text('Page Two Content'));
       default:
         return const SizedBox.shrink();
     }
