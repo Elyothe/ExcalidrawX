@@ -34,7 +34,7 @@ jobs:
               "opencode": {
                 "npm": "@ai-sdk/openai-compatible",
                 "options": {
-                  "baseURL": "https://opencode.ai/zen/v1",
+                  "baseURL": "https://opencode.ai/zen/v1/chat/completions",
                   "apiKey": "${OPENCODE_API_KEY}"
                 },
                 "models": {
@@ -49,9 +49,7 @@ jobs:
           EOF
 
       - name: Debug config
-        run: |
-          echo "===== CONFIG ====="
-          cat ~/.config/opencode/opencode.json
+        run: cat ~/.config/opencode/opencode.json
 
       - name: Review PR with opencode
         run: |
