@@ -18,11 +18,10 @@ jobs:
       - name: Review PR with opencode
         run: |
           export PATH="$HOME/.opencode/bin:$PATH"
-          opencode run -m deepseek/deepseek-v4-flash \
+          opencode run -m deepseek-v4-flash \
             "Review this pull request changes:
             1. Read the git diff
             2. Check for bugs, code quality issues, security problems
             3. Post a review comment on the PR"
         env:
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
