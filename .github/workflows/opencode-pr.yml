@@ -21,9 +21,9 @@ jobs:
       - name: Install opencode
         run: curl -fsSL https://opencode.ai/install | bash
 
-      - name: Configure opencode
+      - name: Configure OpenCode Zen
         env:
-          MINIMAX_API_KEY: ${{ secrets.MINIMAX_API_KEY }}
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
         run: |
           mkdir -p ~/.config/opencode
 
@@ -31,20 +31,20 @@ jobs:
           {
             "\$schema": "https://opencode.ai/config.json",
             "provider": {
-              "minimax": {
-                "npm": "@ai-sdk/anthropic",
+              "opencode": {
+                "npm": "@ai-sdk/openai-compatible",
                 "options": {
-                  "baseURL": "https://api.minimax.io/anthropic/v1",
-                  "apiKey": "${MINIMAX_API_KEY}"
+                  "baseURL": "https://opencode.ai/zen/v1",
+                  "apiKey": "${OPENCODE_API_KEY}"
                 },
                 "models": {
-                  "MiniMax-Text-01": {
-                    "name": "MiniMax-Text-01"
+                  "minimax-m2.7": {
+                    "name": "minimax-m2.7"
                   }
                 }
               }
             },
-            "model": "minimax/MiniMax-Text-01"
+            "model": "opencode/minimax-m2.7"
           }
           EOF
 
@@ -58,7 +58,7 @@ jobs:
           opencode run \
             --print-logs \
             --log-level DEBUG \
-            -m minimax/MiniMax-Text-01 \
+            -m opencode/minimax-m2.7 \
             "Review this pull request changes:
             1. Read the git diff
             2. Check for bugs
