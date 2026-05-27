@@ -3,19 +3,24 @@ import 'package:excalidrawx/domain/repository/drawer_repository.dart';
 import 'package:excalidrawx/domain/usecase/create_drawer_usecase.dart';
 import 'package:get_it/get_it.dart';
 
+final getIt = GetIt.instance;
+
 class Locator {
-  final getIt = GetIt.instance;
+  static void setup() {}
+}
 
-  void configureDependencies() {
+void setupDependencies() {
 
-    //Repository
-    getIt.registerLazySingleton<DrawerRepository>(
-      () => DrawerRepositoryImplementation(),
-    );
+  //Repository
+  getIt.registerLazySingleton<DrawerRepository>(
+        () => DrawerRepositoryImplementation(),
+  );
 
-    //Usecases
-    getIt.registerLazySingleton<CreateDrawerUseCase>(
-      () => CreateDrawerUseCase(getIt<DrawerRepository>()),
-    );
-  }
+  //Usecases
+  getIt.registerLazySingleton(
+        () => CreateDrawerUseCase(
+          drawerRepository: getIt<DrawerRepository>(),
+        )
+  );
+
 }

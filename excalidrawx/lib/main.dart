@@ -1,6 +1,15 @@
 import 'package:excalidrawx/presentation/screen/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:macos_ui/macos_ui.dart';
+
+import 'core/locator.dart';
+
+
+GetIt getIt = GetIt.instance;
+void setupLocator() {
+  Locator.setup();
+}
 
 Future<void> _configureMacosWindowUtils() async {
   const config = MacosWindowUtilsConfig(
@@ -12,6 +21,8 @@ Future<void> _configureMacosWindowUtils() async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await _configureMacosWindowUtils();
+  setupLocator();
+
   runApp(const MyApp());
 }
 
