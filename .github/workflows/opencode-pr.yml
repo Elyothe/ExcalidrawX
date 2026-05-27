@@ -38,20 +38,18 @@ jobs:
                   "apiKey": "${MINIMAX_API_KEY}"
                 },
                 "models": {
-                  "MiniMax-M2.7": {
-                    "name": "MiniMax-M2.7"
+                  "MiniMax-Text-01": {
+                    "name": "MiniMax-Text-01"
                   }
                 }
               }
             },
-            "model": "minimax/MiniMax-M2.7"
+            "model": "minimax/MiniMax-Text-01"
           }
           EOF
 
       - name: Debug config
-        run: |
-          echo "----- CONFIG -----"
-          cat ~/.config/opencode/opencode.json
+        run: cat ~/.config/opencode/opencode.json
 
       - name: Review PR with opencode
         run: |
@@ -60,7 +58,7 @@ jobs:
           opencode run \
             --print-logs \
             --log-level DEBUG \
-            -m minimax/MiniMax-M2.7 \
+            -m minimax/MiniMax-Text-01 \
             "Review this pull request changes:
             1. Read the git diff
             2. Check for bugs
