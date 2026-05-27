@@ -22,34 +22,36 @@ jobs:
         run: curl -fsSL https://opencode.ai/install | bash
 
       - name: Configure OpenCode Zen
-      env:
-        OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
-      run: |
-        mkdir -p ~/.config/opencode
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+        run: |
+          mkdir -p ~/.config/opencode
 
-        cat > ~/.config/opencode/opencode.json << EOF
-        {
-          "\$schema": "https://opencode.ai/config.json",
-          "provider": {
-            "opencode": {
-              "npm": "@ai-sdk/openai-compatible",
-              "options": {
-                "baseURL": "https://opencode.ai/zen/v1",
-                "apiKey": "${OPENCODE_API_KEY}"
-              },
-              "models": {
-                "minimax-m2.7": {
-                  "name": "minimax-m2.7"
+          cat > ~/.config/opencode/opencode.json << EOF
+          {
+            "\$schema": "https://opencode.ai/config.json",
+            "provider": {
+              "opencode": {
+                "npm": "@ai-sdk/openai-compatible",
+                "options": {
+                  "baseURL": "https://opencode.ai/zen/v1",
+                  "apiKey": "${OPENCODE_API_KEY}"
+                },
+                "models": {
+                  "minimax-m2.7": {
+                    "name": "minimax-m2.7"
+                  }
                 }
               }
-            }
-          },
-          "model": "minimax-m2.7"
-        }
-        EOF
+            },
+            "model": "minimax-m2.7"
+          }
+          EOF
 
       - name: Debug config
-        run: cat ~/.config/opencode/opencode.json
+        run: |
+          echo "===== CONFIG ====="
+          cat ~/.config/opencode/opencode.json
 
       - name: Review PR with opencode
         run: |
@@ -58,7 +60,7 @@ jobs:
           opencode run \
             --print-logs \
             --log-level DEBUG \
-            -m opencode/minimax-m2.7 \
+            -m minimax-m2.7 \
             "Review this pull request changes:
             1. Read the git diff
             2. Check for bugs
