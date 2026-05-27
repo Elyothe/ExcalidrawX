@@ -26,10 +26,7 @@ class _MacosLayout extends State<MacosLayout> {
             },
             items: const [
               SidebarItem(
-                label: Text('Page One'),
-              ),
-              SidebarItem(
-                label: Text('Page Two'),
+                label: Text('Accueil'),
               ),
             ],
           );
