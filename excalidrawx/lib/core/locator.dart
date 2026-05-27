@@ -6,21 +6,17 @@ import 'package:get_it/get_it.dart';
 final getIt = GetIt.instance;
 
 class Locator {
-  static void setup() {}
-}
+  static void setup() {
+    //Repository
+    getIt.registerLazySingleton<DrawerRepository>(
+          () => DrawerRepositoryImplementation(),
+    );
 
-void setupDependencies() {
-
-  //Repository
-  getIt.registerLazySingleton<DrawerRepository>(
-        () => DrawerRepositoryImplementation(),
-  );
-
-  //Usecases
-  getIt.registerLazySingleton(
-        () => CreateDrawerUseCase(
+    //Usecases
+    getIt.registerLazySingleton(
+            () => CreateDrawerUseCase(
           drawerRepository: getIt<DrawerRepository>(),
         )
-  );
-
+    );
+  }
 }
