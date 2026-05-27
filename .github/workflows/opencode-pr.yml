@@ -1,29 +1,38 @@
 name: opencode-pr-review
+
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+
 jobs:
   opencode:
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
       pull-requests: write
+
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Install opencode
         run: curl -fsSL https://opencode.ai/install | bash
-      - name: Config MiniMax provider
+
+      - name: Configure opencode
+        env:
+          MINIMAX_API_KEY: ${{ secrets.MINI_MAX }}
         run: |
           mkdir -p ~/.config/opencode
-          cat > ~/.config/opencode/opencode.json << 'EOF'
+
+          cat > ~/.config/opencode/opencode.json << EOF
           {
             "provider": {
               "minimax": {
                 "options": {
                   "baseURL": "https://api.minimax.io/anthropic/v1",
-                  "apiKey": "$MINIMAX_API_KEY"
+                  "apiKey": "${MINI_MAX}"
                 },
                 "models": {
                   "MiniMax-M2.7": {
@@ -34,15 +43,23 @@ jobs:
             }
           }
           EOF
+
+      - name: Debug config
+        run: cat ~/.config/opencode/opencode.json
+
+      - name: Review PR with opencode
         env:
           MINIMAX_API_KEY: ${{ secrets.MINI_MAX }}
-      - name: Review PR with opencode
         run: |
           export PATH="$HOME/.opencode/bin:$PATH"
-          opencode run -m minimax/MiniMax-M2.7 \
+
+          opencode run \
+            --print-logs \
+            --log-level DEBUG \
+            -m minimax/MiniMax-M2.7 \
             "Review this pull request changes:
             1. Read the git diff
-            2. Check for bugs, code quality issues, security problems
-            3. Post a review comment on the PR"
-        env:
-          MINIMAX_API_KEY: ${{ secrets.MINI_MAX }}
+            2. Check for bugs
+            3. Check security issues
+            4. Check code quality
+            5. Post a review comment on the PR"
