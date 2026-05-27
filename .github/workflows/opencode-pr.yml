@@ -1,26 +1,67 @@
-- name: Configure OpenCode Zen
-  env:
-    OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
-  run: |
-    mkdir -p ~/.config/opencode
+name: opencode-pr-review
 
-    cat > ~/.config/opencode/opencode.json << EOF
-    {
-      "\$schema": "https://opencode.ai/config.json",
-      "provider": {
-        "opencode": {
-          "npm": "@ai-sdk/openai-compatible",
-          "options": {
-            "baseURL": "https://opencode.ai/zen/v1",
-            "apiKey": "${OPENCODE_API_KEY}"
-          },
-          "models": {
-            "minimax-m2.7": {
-              "name": "minimax-m2.7"
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  opencode:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install opencode
+        run: curl -fsSL https://opencode.ai/install | bash
+
+      - name: Configure OpenCode Zen
+      env:
+        OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+      run: |
+        mkdir -p ~/.config/opencode
+
+        cat > ~/.config/opencode/opencode.json << EOF
+        {
+          "\$schema": "https://opencode.ai/config.json",
+          "provider": {
+            "opencode": {
+              "npm": "@ai-sdk/openai-compatible",
+              "options": {
+                "baseURL": "https://opencode.ai/zen/v1",
+                "apiKey": "${OPENCODE_API_KEY}"
+              },
+              "models": {
+                "minimax-m2.7": {
+                  "name": "minimax-m2.7"
+                }
+              }
             }
-          }
+          },
+          "model": "minimax-m2.7"
         }
-      },
-      "model": "minimax-m2.7"
-    }
-    EOF
+        EOF
+
+      - name: Debug config
+        run: cat ~/.config/opencode/opencode.json
+
+      - name: Review PR with opencode
+        run: |
+          export PATH="$HOME/.opencode/bin:$PATH"
+
+          opencode run \
+            --print-logs \
+            --log-level DEBUG \
+            -m opencode/minimax-m2.7 \
+            "Review this pull request changes:
+            1. Read the git diff
+            2. Check for bugs
+            3. Check security issues
+            4. Check code quality
+            5. Post a review comment on the PR"
