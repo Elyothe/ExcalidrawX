@@ -8,20 +8,41 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-      issues: write
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Install opencode
         run: curl -fsSL https://opencode.ai/install | bash
+      - name: Config MiniMax provider
+        run: |
+          mkdir -p ~/.config/opencode
+          cat > ~/.config/opencode/opencode.json << 'EOF'
+          {
+            "provider": {
+              "minimax": {
+                "options": {
+                  "baseURL": "https://api.minimax.io/anthropic/v1",
+                  "apiKey": "$MINIMAX_API_KEY"
+                },
+                "models": {
+                  "MiniMax-M2.7": {
+                    "name": "MiniMax-M2.7"
+                  }
+                }
+              }
+            }
+          }
+          EOF
+        env:
+          MINIMAX_API_KEY: ${{ secrets.MINI_MAX }}
       - name: Review PR with opencode
         run: |
           export PATH="$HOME/.opencode/bin:$PATH"
-          opencode run -m deepseek-v4-flash \
+          opencode run -m minimax/MiniMax-M2.7 \
             "Review this pull request changes:
             1. Read the git diff
             2. Check for bugs, code quality issues, security problems
             3. Post a review comment on the PR"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MINIMAX_API_KEY: ${{ secrets.MINI_MAX }}
