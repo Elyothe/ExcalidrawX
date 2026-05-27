@@ -8,6 +8,8 @@ import 'package:fpdart/fpdart.dart';
 
 class DrawerRepositoryImplementation implements DrawerRepository {
 
+  /// Opens a "Save As" dialog with [name] (adds `.excalidraw` if missing).
+  /// Returns the saved file path, or `null` if the user cancelled.
   @override
   Future<Either<DrawerError, String>> saveFile(
     Uint8List data, {
