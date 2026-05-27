@@ -13,7 +13,8 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -22,17 +23,19 @@ jobs:
 
       - name: Configure opencode
         env:
-          MINIMAX_API_KEY: ${{ secrets.MINI_MAX }}
+          MINIMAX_API_KEY: ${{ secrets.MINIMAX_API_KEY }}
         run: |
           mkdir -p ~/.config/opencode
 
           cat > ~/.config/opencode/opencode.json << EOF
           {
+            "$schema": "https://opencode.ai/config.json",
             "provider": {
               "minimax": {
+                "npm": "@ai-sdk/anthropic",
                 "options": {
                   "baseURL": "https://api.minimax.io/anthropic/v1",
-                  "apiKey": "${MINI_MAX}"
+                  "apiKey": "${MINIMAX_API_KEY}"
                 },
                 "models": {
                   "MiniMax-M2.7": {
@@ -40,7 +43,8 @@ jobs:
                   }
                 }
               }
-            }
+            },
+            "model": "minimax/MiniMax-M2.7"
           }
           EOF
 
@@ -48,8 +52,6 @@ jobs:
         run: cat ~/.config/opencode/opencode.json
 
       - name: Review PR with opencode
-        env:
-          MINIMAX_API_KEY: ${{ secrets.MINI_MAX }}
         run: |
           export PATH="$HOME/.opencode/bin:$PATH"
 
