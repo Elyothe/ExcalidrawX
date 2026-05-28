@@ -5,6 +5,9 @@ import 'package:excalidrawx/domain/entities/error/drawer_error.dart';
 import 'package:excalidrawx/domain/repository/drawer_repository.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:logger/logger.dart';
+
+var logger = Logger();
 
 class DrawerRepositoryImplementation implements DrawerRepository {
 
@@ -29,8 +32,10 @@ class DrawerRepositoryImplementation implements DrawerRepository {
 
       final file = File(path);
       await file.writeAsBytes(data);
+      logger.i("File save as $path");
       return Right(path);
     } catch (e) {
+      logger.e("Save file error $e");
       return Left(DrawerSaveFailure(
         'Erreur lors de la sauvegarde',
         underlying: e,
