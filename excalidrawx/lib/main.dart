@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:macos_ui/macos_ui.dart';
 
+import 'dart:io' show Platform;
+
 import 'core/locator.dart';
+import 'core/logger/logger_setup.dart';
 
 
 GetIt getIt = GetIt.instance;
@@ -20,6 +23,7 @@ Future<void> _configureMacosWindowUtils() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await setupLogger(directory: '${Platform.environment['HOME']}/Documents');
   await _configureMacosWindowUtils();
   setupLocator();
 
