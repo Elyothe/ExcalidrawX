@@ -1,10 +1,14 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:bloc/bloc.dart';
 import 'package:excalidrawx/domain/entities/error/drawer_error.dart';
+import 'package:excalidrawx/domain/usecase/create_directory_usecase.dart';
 import 'package:excalidrawx/domain/usecase/create_drawer_usecase.dart';
 import '../../../core/locator.dart';
 import 'package:dart_mappable/dart_mappable.dart';
+
+import '../../../domain/entities/error/directory_error.dart';
 
 
 part 'home_event.dart';
@@ -16,6 +20,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   HomeBloc() : super(const HomeState()) {
     on<OnCreateDrawer>(_onCreateDrawer);
+    on<OnCreateFolder>(_onCreateFolder);
   }
 
   Future<void> _onCreateDrawer(OnCreateDrawer event, Emitter<HomeState> emit) async {
@@ -34,6 +39,27 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             status: HomeStatus.failure,
             errorMessage: message,
           )),
+      },
+      (path) => emit(state.copyWith(
+        status: HomeStatus.success,
+        savedPath: path,
+      )),
+    );
+  }
+
+  Future<void> _onCreateFolder(OnCreateFolder event, Emitter<HomeState> emit) async {
+
+    emit(state.copyWith(status: HomeStatus.loading));
+
+    final createDirectoryUseCase = getIt.get<CreateDirectoryUsecase>();
+    final result = await createDirectoryUseCase.call(name: event.name, base: event.base);
+
+    result.fold(
+      (error) => switch (error) {
+        FolderCreateFailure(:final message) => emit(state.copyWith(
+          status: HomeStatus.failure,
+          errorMessage: message,
+        )),
       },
       (path) => emit(state.copyWith(
         status: HomeStatus.success,

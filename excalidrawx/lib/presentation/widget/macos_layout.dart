@@ -3,8 +3,9 @@ import 'package:macos_ui/macos_ui.dart';
 
 class MacosLayout extends StatefulWidget {
   final VoidCallback onSave;
+  final VoidCallback onCreateFolder;
 
-  const MacosLayout({super.key, required this.onSave});
+  const MacosLayout({super.key, required this.onSave, required this.onCreateFolder});
 
   @override
   State<MacosLayout> createState() => _MacosLayout();
@@ -35,10 +36,21 @@ class _MacosLayout extends State<MacosLayout> {
         },
         bottom: Padding(
           padding: const EdgeInsets.all(16),
-          child: PushButton(
-            controlSize: ControlSize.large,
-            child: const Text('Enregistrer'),
-            onPressed: () => widget.onSave(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              PushButton(
+                controlSize: ControlSize.large,
+                child: const Text('Enregistrer'),
+                onPressed: () => widget.onSave(),
+              ),
+              const SizedBox(height: 8),
+              PushButton(
+                controlSize: ControlSize.large,
+                child: const Text('Nouveau dossier'),
+                onPressed: () => widget.onCreateFolder(),
+              ),
+            ],
           ),
         ),
       ),

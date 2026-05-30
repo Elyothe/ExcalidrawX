@@ -8,8 +8,8 @@ class CreateDrawerUseCase {
   final DrawerRepository _drawerRepository;
 
   CreateDrawerUseCase({
-    required DrawerRepository drawerRepository,
-  }) : _drawerRepository = drawerRepository;
+    required this._drawerRepository,
+  });
 
   Future<Either<DrawerError, String>> call(
     Uint8List data, {

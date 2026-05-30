@@ -5,9 +5,8 @@ import 'package:excalidrawx/domain/entities/error/drawer_error.dart';
 import 'package:excalidrawx/domain/repository/drawer_repository.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:logger/logger.dart';
 
-var logger = Logger();
+import '../../core/logger/logger_setup.dart';
 
 class DrawerRepositoryImplementation implements DrawerRepository {
 

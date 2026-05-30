@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:excalidrawx/presentation/bloc/home/home_bloc.dart';
 import 'package:excalidrawx/presentation/screen/excalidraw_screen.dart';
 import 'package:excalidrawx/presentation/widget/macos_layout.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -30,6 +32,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       final data = Uint8List(0);
                       final name = 'excalidraw-${DateTime.now().millisecondsSinceEpoch}';
                       context.read<HomeBloc>().add(OnCreateDrawer(data, name: name));
+                    },
+                    onCreateFolder: () async {
+                      final selectedPath = await FilePicker.getDirectoryPath(
+                        dialogTitle: 'Choisir l\'emplacement du dossier',
+                      );
+                      if (selectedPath == null) return;
+                      final name = 'folder-${DateTime.now().millisecondsSinceEpoch}';
+                      final base = Directory(selectedPath);
+                      context.read<HomeBloc>().add(OnCreateFolder(name, base: base));
                     },
                   ),
                 ),

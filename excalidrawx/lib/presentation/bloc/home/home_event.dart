@@ -8,3 +8,10 @@ class OnCreateDrawer extends HomeEvent {
 
   OnCreateDrawer(this.data, {required this.name});
 }
+
+class OnCreateFolder extends HomeEvent {
+  final String name;
+  final Directory? base;
+
+  OnCreateFolder(this.name, {this.base});
+}
