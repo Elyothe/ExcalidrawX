@@ -4,6 +4,8 @@ import 'package:excalidrawx/domain/repository/directory_repository.dart';
 import 'package:excalidrawx/domain/repository/drawer_repository.dart';
 import 'package:excalidrawx/domain/usecase/create_directory_usecase.dart';
 import 'package:excalidrawx/domain/usecase/create_drawer_usecase.dart';
+import 'package:excalidrawx/domain/usecase/get_exists_folder_usecase.dart';
+import 'package:excalidrawx/domain/usecase/select_folder_usecase.dart';
 import 'package:get_it/get_it.dart';
 
 final getIt = GetIt.instance;
@@ -24,9 +26,18 @@ class Locator {
           drawerRepository: getIt<DrawerRepository>(),
         )
     );
-    //Usecases
     getIt.registerLazySingleton(
             () => CreateDirectoryUsecase(
+          directoryRepository: getIt<DirectoryRepository>(),
+        )
+    );
+    getIt.registerLazySingleton(
+            () => SelectFolderUsecase(
+          directoryRepository: getIt<DirectoryRepository>(),
+        )
+    );
+    getIt.registerLazySingleton(
+            () => GetExistsFolderUsecase(
           directoryRepository: getIt<DirectoryRepository>(),
         )
     );

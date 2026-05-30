@@ -15,3 +15,7 @@ class OnCreateFolder extends HomeEvent {
 
   OnCreateFolder(this.name, {this.base});
 }
+
+class OnSelectFolder extends HomeEvent {}
+
+class OnLoadSavedFolders extends HomeEvent {}

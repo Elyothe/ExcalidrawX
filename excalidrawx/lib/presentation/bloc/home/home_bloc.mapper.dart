@@ -41,12 +41,20 @@ class HomeStateMapper extends ClassMapperBase<HomeState> {
     _$errorMessage,
     opt: true,
   );
+  static List<String> _$savedFolders(HomeState v) => v.savedFolders;
+  static const Field<HomeState, List<String>> _f$savedFolders = Field(
+    'savedFolders',
+    _$savedFolders,
+    opt: true,
+    def: const [],
+  );
 
   @override
   final MappableFields<HomeState> fields = const {
     #status: _f$status,
     #savedPath: _f$savedPath,
     #errorMessage: _f$errorMessage,
+    #savedFolders: _f$savedFolders,
   };
 
   static HomeState _instantiate(DecodingData data) {
@@ -54,6 +62,7 @@ class HomeStateMapper extends ClassMapperBase<HomeState> {
       status: data.dec(_f$status),
       savedPath: data.dec(_f$savedPath),
       errorMessage: data.dec(_f$errorMessage),
+      savedFolders: data.dec(_f$savedFolders),
     );
   }
 
@@ -116,7 +125,13 @@ extension HomeStateValueCopy<$R, $Out> on ObjectCopyWith<$R, HomeState, $Out> {
 
 abstract class HomeStateCopyWith<$R, $In extends HomeState, $Out>
     implements ClassCopyWith<$R, $In, $Out> {
-  $R call({HomeStatus? status, String? savedPath, String? errorMessage});
+  ListCopyWith<$R, String, ObjectCopyWith<$R, String, String>> get savedFolders;
+  $R call({
+    HomeStatus? status,
+    String? savedPath,
+    String? errorMessage,
+    List<String>? savedFolders,
+  });
   HomeStateCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
 }
 
@@ -129,15 +144,24 @@ class _HomeStateCopyWithImpl<$R, $Out>
   late final ClassMapperBase<HomeState> $mapper =
       HomeStateMapper.ensureInitialized();
   @override
+  ListCopyWith<$R, String, ObjectCopyWith<$R, String, String>>
+  get savedFolders => ListCopyWith(
+    $value.savedFolders,
+    (v, t) => ObjectCopyWith(v, $identity, t),
+    (v) => call(savedFolders: v),
+  );
+  @override
   $R call({
     HomeStatus? status,
     Object? savedPath = $none,
     Object? errorMessage = $none,
+    List<String>? savedFolders,
   }) => $apply(
     FieldCopyWithData({
       if (status != null) #status: status,
       if (savedPath != $none) #savedPath: savedPath,
       if (errorMessage != $none) #errorMessage: errorMessage,
+      if (savedFolders != null) #savedFolders: savedFolders,
     }),
   );
   @override
@@ -145,6 +169,7 @@ class _HomeStateCopyWithImpl<$R, $Out>
     status: data.get(#status, or: $value.status),
     savedPath: data.get(#savedPath, or: $value.savedPath),
     errorMessage: data.get(#errorMessage, or: $value.errorMessage),
+    savedFolders: data.get(#savedFolders, or: $value.savedFolders),
   );
 
   @override

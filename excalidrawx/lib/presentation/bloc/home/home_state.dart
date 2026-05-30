@@ -7,10 +7,12 @@ class HomeState with HomeStateMappable{
   final HomeStatus status;
   final String? savedPath;
   final String? errorMessage;
+  final List<String> savedFolders;
 
   const HomeState({
     this.status = HomeStatus.initial,
     this.savedPath,
     this.errorMessage,
+    this.savedFolders = const [],
   });
 }
