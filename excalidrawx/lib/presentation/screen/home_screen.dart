@@ -62,6 +62,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           onSelectFolder: () {
                             context.read<HomeBloc>().add(OnSelectFolder());
                           },
+                          onDeleteFolder: (path) {
+                            context.read<HomeBloc>().add(OnDeleteFolder(path));
+                          },
                           listFolder: state.savedFolders,
                         );
                       },

@@ -19,3 +19,8 @@ class OnCreateFolder extends HomeEvent {
 class OnSelectFolder extends HomeEvent {}
 
 class OnLoadSavedFolders extends HomeEvent {}
+
+class OnDeleteFolder extends HomeEvent {
+  final String path;
+  OnDeleteFolder(this.path);
+}

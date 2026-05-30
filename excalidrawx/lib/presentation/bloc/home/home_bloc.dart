@@ -11,6 +11,7 @@ import '../../../core/locator.dart';
 import 'package:dart_mappable/dart_mappable.dart';
 
 import '../../../core/logger/logger_setup.dart';
+import 'package:excalidrawx/domain/usecase/delete_folder_usecase.dart';
 import '../../../domain/entities/error/directory_error.dart';
 
 
@@ -26,6 +27,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<OnCreateFolder>(_onCreateFolder);
     on<OnSelectFolder>(_onSelectFolder);
     on<OnLoadSavedFolders>(_onLoadSavedFolders);
+    on<OnDeleteFolder>(_onDeleteFolder);
   }
 
   Future<void> _onCreateDrawer(OnCreateDrawer event, Emitter<HomeState> emit) async {
@@ -43,6 +45,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         DrawerSaveFailure(:final message) => emit(state.copyWith(
             status: HomeStatus.failure,
             errorMessage: message,
+          )),
+        _ => emit(state.copyWith(
+            status: HomeStatus.failure,
+            errorMessage: 'Une erreur est survenue',
           )),
       },
       (path) => emit(state.copyWith(
@@ -104,6 +110,27 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           savedPath: path,
         ),
       ),
+    );
+  }
+
+  Future<void> _onDeleteFolder(
+      OnDeleteFolder event,
+      Emitter<HomeState> emit,
+      ) async {
+    emit(state.copyWith(status: HomeStatus.loading));
+
+    final deleteFolderUsecase = getIt.get<DeleteFolderUsecase>();
+    final result = await deleteFolderUsecase(event.path);
+
+    result.fold(
+      (error) => emit(state.copyWith(
+        status: HomeStatus.failure,
+        errorMessage: error.message,
+      )),
+      (_) {
+        logger.i("Folder removed from prefs: ${event.path}");
+        add(OnLoadSavedFolders());
+      },
     );
   }
 

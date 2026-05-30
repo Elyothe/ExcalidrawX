@@ -33,6 +33,26 @@ class DirectoryRepositoryImplementation implements DirectoryRepository {
     }
   }
 
+  /// Removes the folder path from SharedPreferences.
+  /// Returns the removed path on success.
+  @override
+  Future<Either<FolderDeleteFailure, String>> deleteFolder(String path) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final existingPaths = prefs.getStringList(_foldersKey) ?? [];
+      existingPaths.remove(path);
+      await prefs.setStringList(_foldersKey, existingPaths);
+
+      logger.i("Folder removed from prefs: $path");
+      return Right(path);
+    } catch (e) {
+      logger.e("Delete folder error $e");
+      return Left(FolderDeleteFailure(
+        'Erreur lors de la suppression du dossier',
+      ));
+    }
+  }
+
   /// Opens a native folder picker dialog for the user to select a directory.
   /// Saves the chosen path to SharedPreferences and returns it on success.
   @override

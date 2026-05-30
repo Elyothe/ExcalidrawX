@@ -41,4 +41,32 @@ class DrawerRepositoryImplementation implements DrawerRepository {
       ));
     }
   }
+
+  /// Opens a file picker to select an existing `.excalidraw` file.
+  /// Returns the selected file path on success.
+  @override
+  Future<Either<DrawerOpenFailure, String>> openFile(
+    Uint8List data, {
+    required String name,
+  }) async {
+    try {
+      final result = await FilePicker.pickFiles(
+        dialogTitle: 'Ouvrir un fichier Excalidraw',
+        type: FileType.custom,
+        allowedExtensions: ['excalidraw'],
+      );
+
+      if (result == null) return Left(DrawerOpenFailure('Aucun fichier sélectionné'));
+
+      final filePath = result.files.single.path!;
+      logger.i("File opened: $filePath");
+      return Right(filePath);
+    } catch (e) {
+      logger.e("Open file error $e");
+      return Left(DrawerOpenFailure(
+        'Erreur lors de l\'ouverture du fichier',
+        underlying: e,
+      ));
+    }
+  }
 }

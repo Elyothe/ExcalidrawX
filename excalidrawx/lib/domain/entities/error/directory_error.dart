@@ -5,6 +5,11 @@ final class FolderCreateFailure extends DirectoryError {
   FolderCreateFailure(this.message);
 }
 
+final class FolderDeleteFailure extends DirectoryError {
+  final String message;
+  FolderDeleteFailure(this.message);
+}
+
 final class FolderSelectFailure extends DirectoryError {
   final String message;
   FolderSelectFailure(this.message);

@@ -8,4 +8,9 @@ abstract class DrawerRepository {
     Uint8List data, {
     required String name,
   });
+
+  Future<Either<DrawerOpenFailure, String>> openFile(
+      Uint8List data, {
+        required String name,
+      });
 }
