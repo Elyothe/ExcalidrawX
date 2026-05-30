@@ -13,6 +13,8 @@ class DirectoryRepositoryImplementation implements DirectoryRepository {
 
   static const String _foldersKey = 'saved_folders';
 
+  /// Creates a new folder in the specified base directory or in the default
+  /// application documents directory. Returns the created folder path on success.
   @override
   Future<Either<FolderCreateFailure, String>> createFolder(String name, {Directory? base}) async {
 
@@ -31,6 +33,8 @@ class DirectoryRepositoryImplementation implements DirectoryRepository {
     }
   }
 
+  /// Opens a native folder picker dialog for the user to select a directory.
+  /// Saves the chosen path to SharedPreferences and returns it on success.
   @override
   Future<Either<FolderSelectFailure, String>> selectFolder({Directory? base}) async {
     try {
@@ -57,6 +61,8 @@ class DirectoryRepositoryImplementation implements DirectoryRepository {
     }
   }
 
+  /// Retrieves the list of previously saved folder paths from SharedPreferences
+  /// and filters out those that no longer exist on the filesystem.
   @override
   Future<Either<FolderGetExistFailure, List<String>>> getFoldersExists() async {
     try {
