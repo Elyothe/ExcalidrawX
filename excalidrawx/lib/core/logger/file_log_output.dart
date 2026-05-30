@@ -37,16 +37,18 @@ class FileLogOutput extends LogOutput {
   void output(OutputEvent event) {
     if (_sink == null) return;
 
-    for (var line in event.lines) {
-      final clean = line.replaceAll(_ansiEscape, '');
-      _sink!.writeln(clean);
-      _currentSize += clean.length + 1;
+    try {
+      for (var line in event.lines) {
+        final clean = line.replaceAll(_ansiEscape, '');
+        _sink!.writeln(clean);
+        _currentSize += clean.length + 1;
 
-      if (_currentSize >= maxFileSizeBytes) {
-        _rotate();
+        if (_currentSize >= maxFileSizeBytes) {
+          _rotate();
+        }
       }
-    }
-    _sink?.flush();
+      _sink?.flush();
+    } catch (_) {}
   }
 
   void _rotate() {
