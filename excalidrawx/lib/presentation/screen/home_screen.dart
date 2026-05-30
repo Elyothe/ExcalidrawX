@@ -42,23 +42,28 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                   SizedBox(
                     width: 220,
-                    child: MacosLayout(
-                      onSave: () {
-                        final data = Uint8List(0);
-                        final name = 'excalidraw-${DateTime.now().millisecondsSinceEpoch}';
-                        context.read<HomeBloc>().add(OnCreateDrawer(data, name: name));
-                      },
-                      onCreateFolder: () async {
-                        final selectedPath = await FilePicker.getDirectoryPath(
-                          dialogTitle: 'Choisir l\'emplacement du dossier',
+                    child: BlocBuilder<HomeBloc, HomeState>(
+                      builder: (context, state) {
+                        return MacosLayout(
+                          onSave: () {
+                            final data = Uint8List(0);
+                            final name = 'excalidraw-${DateTime.now().millisecondsSinceEpoch}';
+                            context.read<HomeBloc>().add(OnCreateDrawer(data, name: name));
+                          },
+                          onCreateFolder: () async {
+                            final selectedPath = await FilePicker.getDirectoryPath(
+                              dialogTitle: 'Choisir l\'emplacement du dossier',
+                            );
+                            if (selectedPath == null) return;
+                            final name = 'folder-${DateTime.now().millisecondsSinceEpoch}';
+                            final base = Directory(selectedPath);
+                            context.read<HomeBloc>().add(OnCreateFolder(name, base: base));
+                          },
+                          onSelectFolder: () {
+                            context.read<HomeBloc>().add(OnSelectFolder());
+                          },
+                          listFolder: state.savedFolders,
                         );
-                        if (selectedPath == null) return;
-                        final name = 'folder-${DateTime.now().millisecondsSinceEpoch}';
-                        final base = Directory(selectedPath);
-                        context.read<HomeBloc>().add(OnCreateFolder(name, base: base));
-                      },
-                      onSelectFolder: () {
-                        context.read<HomeBloc>().add(OnSelectFolder());
                       },
                     ),
                   ),

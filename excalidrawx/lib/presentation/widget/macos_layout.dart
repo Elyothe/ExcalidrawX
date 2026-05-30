@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:macos_ui/macos_ui.dart';
 
@@ -5,8 +8,9 @@ class MacosLayout extends StatefulWidget {
   final VoidCallback onSave;
   final VoidCallback onCreateFolder;
   final VoidCallback onSelectFolder;
+  final List<String> listFolder;
 
-  const MacosLayout({super.key, required this.onSave, required this.onCreateFolder, required this.onSelectFolder});
+  const MacosLayout({super.key, required this.onSave, required this.onCreateFolder, required this.onSelectFolder, required this.listFolder});
 
   @override
   State<MacosLayout> createState() => _MacosLayout();
@@ -28,9 +32,26 @@ class _MacosLayout extends State<MacosLayout> {
             onChanged: (i) {
               setState(() => pageIndex = i);
             },
-            items: const [
-              SidebarItem(
+            items: [
+              const SidebarItem(
+                leading: MacosIcon(
+                  CupertinoIcons.home,
+                  color: Colors.white,
+                  size: 14,),
                 label: Text('Accueil'),
+              ),
+              const SidebarItem(
+                section: true,
+                label: Text('Dossiers'),
+              ),
+              ...widget.listFolder.map(
+                (path) => SidebarItem(
+                  leading: MacosIcon(
+                    CupertinoIcons.folder,
+                    color: Colors.white,
+                    size: 14,),
+                  label: Text(path.split(Platform.pathSeparator).last),
+                ),
               ),
             ],
           );
@@ -42,7 +63,7 @@ class _MacosLayout extends State<MacosLayout> {
             children: [
               PushButton(
                 controlSize: ControlSize.large,
-                child: const Text('Enregistrer'),
+                child: const Text('Nouveau dessin'),
                 onPressed: () => widget.onSave(),
               ),
               const SizedBox(height: 8),
@@ -79,7 +100,7 @@ class _MacosLayout extends State<MacosLayout> {
   Widget _buildPage(int index) {
     switch (index) {
       case 0:
-        return const Center(child: Text('Page One Content'));
+        return const Center();
       default:
         return const SizedBox.shrink();
     }
