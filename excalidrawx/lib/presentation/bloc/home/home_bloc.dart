@@ -98,18 +98,19 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     final result = await selectFolderUsecase();
 
     result.fold(
-          (error) => emit(
+      (error) => emit(
         state.copyWith(
           status: HomeStatus.failure,
           errorMessage: error.message,
         ),
       ),
-          (path) => emit(
-        state.copyWith(
+      (path) {
+        emit(state.copyWith(
           status: HomeStatus.success,
           savedPath: path,
-        ),
-      ),
+        ));
+        add(OnLoadSavedFolders());
+      },
     );
   }
 
