@@ -35,10 +35,10 @@ class ExcalidrawStateMapper extends ClassMapperBase<ExcalidrawState> {
     _$errorMessage,
     opt: true,
   );
-  static String? _$fileContentToOpen(ExcalidrawState v) => v.fileContentToOpen;
-  static const Field<ExcalidrawState, String> _f$fileContentToOpen = Field(
-    'fileContentToOpen',
-    _$fileContentToOpen,
+  static List<dynamic>? _$elements(ExcalidrawState v) => v.elements;
+  static const Field<ExcalidrawState, List<dynamic>> _f$elements = Field(
+    'elements',
+    _$elements,
     opt: true,
   );
 
@@ -46,14 +46,14 @@ class ExcalidrawStateMapper extends ClassMapperBase<ExcalidrawState> {
   final MappableFields<ExcalidrawState> fields = const {
     #status: _f$status,
     #errorMessage: _f$errorMessage,
-    #fileContentToOpen: _f$fileContentToOpen,
+    #elements: _f$elements,
   };
 
   static ExcalidrawState _instantiate(DecodingData data) {
     return ExcalidrawState(
       status: data.dec(_f$status),
       errorMessage: data.dec(_f$errorMessage),
-      fileContentToOpen: data.dec(_f$fileContentToOpen),
+      elements: data.dec(_f$elements),
     );
   }
 
@@ -119,10 +119,12 @@ extension ExcalidrawStateValueCopy<$R, $Out>
 
 abstract class ExcalidrawStateCopyWith<$R, $In extends ExcalidrawState, $Out>
     implements ClassCopyWith<$R, $In, $Out> {
+  ListCopyWith<$R, dynamic, ObjectCopyWith<$R, dynamic, dynamic>?>?
+  get elements;
   $R call({
     ExcalidrawStatus? status,
     String? errorMessage,
-    String? fileContentToOpen,
+    List<dynamic>? elements,
   });
   ExcalidrawStateCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(
     Then<$Out2, $R2> t,
@@ -138,25 +140,31 @@ class _ExcalidrawStateCopyWithImpl<$R, $Out>
   late final ClassMapperBase<ExcalidrawState> $mapper =
       ExcalidrawStateMapper.ensureInitialized();
   @override
+  ListCopyWith<$R, dynamic, ObjectCopyWith<$R, dynamic, dynamic>?>?
+  get elements => $value.elements != null
+      ? ListCopyWith(
+          $value.elements!,
+          (v, t) => ObjectCopyWith(v, $identity, t),
+          (v) => call(elements: v),
+        )
+      : null;
+  @override
   $R call({
     ExcalidrawStatus? status,
     Object? errorMessage = $none,
-    Object? fileContentToOpen = $none,
+    Object? elements = $none,
   }) => $apply(
     FieldCopyWithData({
       if (status != null) #status: status,
       if (errorMessage != $none) #errorMessage: errorMessage,
-      if (fileContentToOpen != $none) #fileContentToOpen: fileContentToOpen,
+      if (elements != $none) #elements: elements,
     }),
   );
   @override
   ExcalidrawState $make(CopyWithData data) => ExcalidrawState(
     status: data.get(#status, or: $value.status),
     errorMessage: data.get(#errorMessage, or: $value.errorMessage),
-    fileContentToOpen: data.get(
-      #fileContentToOpen,
-      or: $value.fileContentToOpen,
-    ),
+    elements: data.get(#elements, or: $value.elements),
   );
 
   @override

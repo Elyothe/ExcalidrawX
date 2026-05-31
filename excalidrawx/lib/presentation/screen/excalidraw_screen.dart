@@ -67,25 +67,14 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
     _excalidrawBloc.add(OnOpenFile(filePath));
   }
 
-  Future<void> _injectScene(String content) async {
-    try {
-      final scene = jsonDecode(content) as Map<String, dynamic>;
-      final elements = scene['elements'];
-
-      await _controller.runJavaScript('''
+  Future<void> _injectScene(List<dynamic> elements) async {
+    await _controller.runJavaScript('''
       localStorage.setItem(
         "excalidraw",
         ${jsonEncode(jsonEncode(elements))}
       );
       window.location.reload();
     ''');
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = "Erreur lors de l'ouverture du fichier";
-        });
-      }
-    }
   }
 
   @override
@@ -94,10 +83,19 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
       value: _excalidrawBloc,
       child: BlocListener<ExcalidrawBloc, ExcalidrawState>(
         listenWhen: (previous, current) =>
-            current.fileContentToOpen != null &&
-            previous.fileContentToOpen != current.fileContentToOpen,
+            (current.elements != null &&
+                previous.elements != current.elements) ||
+            (current.status == ExcalidrawStatus.failure &&
+                previous.status != ExcalidrawStatus.failure),
         listener: (context, state) {
-          _injectScene(state.fileContentToOpen!);
+          if (state.elements != null) {
+            _injectScene(state.elements!);
+          } else if (state.status == ExcalidrawStatus.failure &&
+              state.errorMessage != null) {
+            setState(() {
+              _errorMessage = state.errorMessage;
+            });
+          }
         },
         child: Scaffold(
           body: Stack(
