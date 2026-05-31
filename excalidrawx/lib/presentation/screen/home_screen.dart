@@ -17,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final HomeBloc _homeBloc;
+  final ValueNotifier<String?> _filePathNotifier = ValueNotifier(null);
 
   @override
   void initState() {
@@ -27,8 +28,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _filePathNotifier.dispose();
     _homeBloc.close();
     super.dispose();
+  }
+
+  Future<void> _onOpenFile() async {
+    final result = await FilePicker.pickFiles(
+      dialogTitle: 'Ouvrir un fichier Excalidraw',
+      type: FileType.custom,
+      allowedExtensions: ['excalidraw'],
+    );
+    if (result == null) return;
+    final filePath = result.files.single.path;
+    if (filePath == null) return;
+    _filePathNotifier.value = filePath;
   }
 
   @override
@@ -50,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             final name = 'excalidraw-${DateTime.now().millisecondsSinceEpoch}';
                             context.read<HomeBloc>().add(OnCreateDrawer(data, name: name));
                           },
+                          onOpenFile: _onOpenFile,
                           onCreateFolder: () async {
                             final selectedPath = await FilePicker.getDirectoryPath(
                               dialogTitle: 'Choisir l\'emplacement du dossier',
@@ -70,8 +85,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                   ),
-                const Expanded(
-                  child: ExcalidrawScreen(),
+                Expanded(
+                  child: ExcalidrawScreen(
+                    filePathNotifier: _filePathNotifier,
+                  ),
                 ),
               ],
             ),
