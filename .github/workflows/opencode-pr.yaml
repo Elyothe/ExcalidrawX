@@ -18,12 +18,34 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Get opencode version
+        id: version
+        shell: bash
+        run: |
+          latest=$(curl -sf https://api.github.com/repos/anomalyco/opencode/releases/latest)
+          version=$(echo "$latest" | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)
+          echo "version=${version:-latest}" >> $GITHUB_OUTPUT
+
+      - name: Cache opencode
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.opencode/bin
+          key: opencode-${{ runner.os }}-${{ runner.arch }}-${{ steps.version.outputs.version }}
+
       - name: Install opencode
+        if: steps.cache.outputs.cache-hit != 'true'
+        shell: bash
         run: curl -fsSL https://opencode.ai/install | bash
+
+      - name: Add opencode to PATH
+        shell: bash
+        run: echo "$HOME/.opencode/bin" >> $GITHUB_PATH
 
       - name: Configure OpenCode Zen
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+        shell: bash
         run: |
           mkdir -p ~/.config/opencode
 
@@ -48,16 +70,10 @@ jobs:
           }
           EOF
 
-      - name: Debug config
-        run: cat ~/.config/opencode/opencode.json
-
       - name: Review PR with opencode
         run: |
-          export PATH="$HOME/.opencode/bin:$PATH"
-
           opencode run \
             --print-logs \
-            --log-level DEBUG \
             -m minimax-m2.7 \
             "Review this pull request changes:
             1. Read the git diff
