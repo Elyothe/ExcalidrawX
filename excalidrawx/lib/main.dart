@@ -1,7 +1,32 @@
-import 'package:excalidrawx/presentation/screen/excalidraw_screen.dart';
+import 'package:excalidrawx/presentation/screen/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:macos_ui/macos_ui.dart';
 
-void main() {
+import 'dart:io' show Platform;
+
+import 'core/locator.dart';
+import 'core/logger/logger_setup.dart';
+
+
+GetIt getIt = GetIt.instance;
+void setupLocator() {
+  Locator.setup();
+}
+
+Future<void> _configureMacosWindowUtils() async {
+  const config = MacosWindowUtilsConfig(
+    toolbarStyle: NSWindowToolbarStyle.unified,
+  );
+  await config.apply();
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await setupLogger(directory: '${Platform.environment['HOME']}/Documents');
+  await _configureMacosWindowUtils();
+  setupLocator();
+
   runApp(const MyApp());
 }
 
@@ -10,34 +35,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MacosApp(
       debugShowCheckedModeBanner: false,
-      home: MyHomePage(),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-
-  @override
-  Widget build(BuildContext context) {
-    var width = MediaQuery.of(context).size.width;
-    var height = MediaQuery.of (context) .size.height;
-    return Scaffold(
-      body: SafeArea(
-        child: SizedBox(
-          width: width,
-          height: height,
-          child: const ExcalidrawScreen(),
-        ),
-      ),
+      title: 'ExcalidrawX',
+      theme: MacosThemeData.light(),
+      darkTheme: MacosThemeData.dark(),
+      themeMode: ThemeMode.system,
+      home: const HomeScreen(),
     );
   }
 }
