@@ -1,62 +1,62 @@
 name: opencode-pr-review
 
 on:
-pull_request:
-types: [opened, synchronize, reopened]
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
-opencode:
-  runs-on: ubuntu-latest
+  opencode:
+    runs-on: ubuntu-latest
 
-permissions:
-  contents: read
-  pull-requests: write
+    permissions:
+      contents: read
+      pull-requests: write
 
-steps:
-  - name: Checkout repository
-    uses: actions/checkout@v4
-    with:
-      fetch-depth: 0
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-  - name: Install OpenCode
-    run: curl -fsSL https://opencode.ai/install | bash
+      - name: Install OpenCode
+        run: curl -fsSL https://opencode.ai/install | bash
 
-  - name: Add OpenCode to PATH
-    run: echo "$HOME/.opencode/bin" >> $GITHUB_PATH
+      - name: Add OpenCode to PATH
+        run: echo "$HOME/.opencode/bin" >> $GITHUB_PATH
 
-  - name: Configure OpenCode
-    env:
-      OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
-    run: |
-      mkdir -p ~/.config/opencode
+      - name: Configure OpenCode
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+        run: |
+          mkdir -p ~/.config/opencode
 
-      cat > ~/.config/opencode/opencode.json <<EOF
-      {
-        "$schema": "https://opencode.ai/config.json",
-        "provider": {
-          "opencode": {
-            "npm": "@ai-sdk/openai-compatible",
-            "options": {
-              "baseURL": "https://opencode.ai/zen/v1",
-              "apiKey": "${OPENCODE_API_KEY}"
+          cat > ~/.config/opencode/opencode.json <<EOF
+          {
+            "$schema": "https://opencode.ai/config.json",
+            "provider": {
+              "opencode": {
+                "npm": "@ai-sdk/openai-compatible",
+                "options": {
+                  "baseURL": "https://opencode.ai/zen/v1",
+                  "apiKey": "${OPENCODE_API_KEY}"
+                },
+                "models": {
+                  "minimax-m2.7": {}
+                }
+              }
             },
-            "models": {
-              "minimax-m2.7": {}
-            }
+            "model": "opencode/minimax-m2.7"
           }
-        },
-        "model": "opencode/minimax-m2.7"
-      }
-      EOF
+          EOF
 
-  - name: Review PR with OpenCode
-    run: |
-      opencode run \
-        --print-logs \
-        -m opencode/minimax-m2.7 \
-        "Review this pull request:
-        1. Read the git diff
-        2. Check for bugs
-        3. Check security issues
-        4. Check code quality
-         5. Post a review comment on the PR"
+      - name: Review PR with OpenCode
+        run: |
+          opencode run \
+            --print-logs \
+            -m opencode/minimax-m2.7 \
+            "Review this pull request:
+            1. Read the git diff
+            2. Check for bugs
+            3. Check security issues
+            4. Check code quality
+            5. Post a review comment on the PR"
