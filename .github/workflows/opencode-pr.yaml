@@ -31,19 +31,31 @@ jobs:
           prompt: |
             Réponds en français. Review this pull request. Do NOT modify any code.
 
-            Pour chaque fichier modifié, poste des commentaires directement sur les lignes de code concernées (inline review comments), organisés par rubrique :
+            PR Number: ${{ github.event.pull_request.number }}
 
-            ## Bugs
-            Signale chaque bug sur la ligne exacte où il se trouve.
+            IMPORTANT: Pour chaque problème trouvé, utilise OBLIGATOIREMENT la commande suivante pour poster un commentaire inline sur la ligne exacte du fichier :
 
-            ## Sécurité
-            Signale chaque faille de sécurité sur la ligne concernée.
+            ```bash
+            gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments \
+              -f body="🔴 **Rubrique** : description" \
+              -f commit_id="HEAD" \
+              -f path="chemin/du/fichier" \
+              -f line=42
+            ```
 
-            ## Qualité de code / Conventions Dart/Flutter
-            Signale les problèmes de style, conventions, const manquants, sur les lignes correspondantes.
+            Organise les commentaires PAR RUBRIQUE (une commande gh par ligne problématique) :
 
-            ## Architecture
-            Signale les problèmes de séparation des couches (UI/logique mélangée, dépendances incorrectes) sur les lignes concernées.
+            ## 🔴 Bugs
+            Signale chaque bug sur sa ligne exacte.
 
-            ## Résumé
-            Un commentaire global en fin de review avec un résumé des points critiques.
+            ## 🟠 Sécurité
+            Signale chaque faille sur sa ligne exacte (hardcoded secrets, injection, validation absente).
+
+            ## 🟡 Qualité de code / Conventions Dart/Flutter
+            Signale sur les lignes exactes (const manquant, naming, patterns dépréciés).
+
+            ## 🔵 Architecture
+            Signale sur les lignes exactes (UI/logique mélangée, service dépendant de BuildContext).
+
+            ## ✅ Résumé
+            Un seul commentaire global de résumé (pas inline) avec les points critiques.
