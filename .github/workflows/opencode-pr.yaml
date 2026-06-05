@@ -6,9 +6,8 @@ types: [opened, synchronize, reopened]
 
 jobs:
 opencode:
-runs-on: ubuntu-latest
+  runs-on: ubuntu-latest
 
-```
 permissions:
   contents: read
   pull-requests: write
@@ -60,5 +59,4 @@ steps:
         2. Check for bugs
         3. Check security issues
         4. Check code quality
-        5. Post a review comment on the PR"
-```
+         5. Post a review comment on the PR"
