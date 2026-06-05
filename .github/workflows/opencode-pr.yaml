@@ -32,10 +32,9 @@ jobs:
 
           cat > ~/.config/opencode/opencode.json <<EOF
           {
-            "$schema": "https://opencode.ai/config.json",
+            "\$schema": "https://opencode.ai/config.json",
             "provider": {
               "opencode": {
-                "npm": "@ai-sdk/openai-compatible",
                 "options": {
                   "baseURL": "https://opencode.ai/zen/v1",
                   "apiKey": "${OPENCODE_API_KEY}"
