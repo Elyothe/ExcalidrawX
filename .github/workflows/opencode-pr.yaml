@@ -40,11 +40,11 @@ jobs:
                   "apiKey": "${OPENCODE_API_KEY}"
                 },
                 "models": {
-                  "minimax-m2.7": {}
+                  "deepseek-v4-flash-free": {}
                 }
               }
             },
-            "model": "opencode/minimax-m2.7"
+            "model": "opencode/deepseek-v4-flash-free"
           }
           EOF
 
@@ -52,7 +52,7 @@ jobs:
         run: |
           opencode run \
             --print-logs \
-            -m opencode/minimax-m2.7 \
+            -m opencode/deepseek-v4-flash-free \
             "Review this pull request:
             1. Read the git diff
             2. Check for bugs
