@@ -29,9 +29,21 @@ jobs:
           model: opencode/deepseek-v4-flash-free
           use_github_token: true
           prompt: |
-            Review this pull request. Do NOT modify any code.
-            1. Read the git diff
-            2. Check for bugs, type safety, and null safety issues
-            3. Check for security issues
-            4. Check adherence to Dart/Flutter conventions
-            5. Post a review comment summarizing your findings
+            Réponds en français. Review this pull request. Do NOT modify any code.
+
+            Pour chaque fichier modifié, poste des commentaires directement sur les lignes de code concernées (inline review comments), organisés par rubrique :
+
+            ## Bugs
+            Signale chaque bug sur la ligne exacte où il se trouve.
+
+            ## Sécurité
+            Signale chaque faille de sécurité sur la ligne concernée.
+
+            ## Qualité de code / Conventions Dart/Flutter
+            Signale les problèmes de style, conventions, const manquants, sur les lignes correspondantes.
+
+            ## Architecture
+            Signale les problèmes de séparation des couches (UI/logique mélangée, dépendances incorrectes) sur les lignes concernées.
+
+            ## Résumé
+            Un commentaire global en fin de review avec un résumé des points critiques.
