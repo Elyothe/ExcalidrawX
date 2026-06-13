@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:excalidrawx/core/logger/logger_setup.dart';
 import 'package:excalidrawx/presentation/bloc/excalidraw/excalidraw_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,6 +24,8 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
   late final WebViewController _controller;
   bool _isLoading = true;
   String? _errorMessage;
+  Timer? _autosaveTimer;
+  String? _lastWrittenData;
 
   @override
   void initState() {
@@ -37,11 +41,13 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
               _isLoading = true;
               _errorMessage = null;
             });
+            _autosaveTimer?.cancel();
           },
           onPageFinished: (String url) {
             setState(() {
               _isLoading = false;
             });
+            _startAutosaveTimer();
           },
           onWebResourceError: (WebResourceError error) {
             setState(() {
@@ -57,6 +63,7 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
   @override
   void dispose() {
     widget.filePathNotifier.removeListener(_onFilePathReceived);
+    _autosaveTimer?.cancel();
     _excalidrawBloc.close();
     super.dispose();
   }
@@ -64,6 +71,7 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
   void _onFilePathReceived() {
     final filePath = widget.filePathNotifier.value;
     if (filePath == null) return;
+    _lastWrittenData = null;
     _excalidrawBloc.add(OnOpenFile(filePath));
   }
 
@@ -75,6 +83,24 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
       );
       window.location.reload();
     ''');
+  }
+
+  void _startAutosaveTimer() {
+    _autosaveTimer?.cancel();
+    _autosaveTimer = Timer.periodic(
+      const Duration(seconds: 5),
+      (_) => _autosaveTick(),
+    );
+  }
+
+  Future<void> _autosaveTick() async {
+      final result = await _controller.runJavaScriptReturningResult(
+        'localStorage.getItem("excalidraw",)',
+      );
+      if (result != null){
+        //logger.i("Content: $result");
+        _excalidrawBloc.add(OnSaveFile(result));
+      }
   }
 
   @override

@@ -7,3 +7,9 @@ class OnOpenFile extends ExcalidrawEvent {
 
   OnOpenFile(this.filePath);
 }
+
+class OnSaveFile extends ExcalidrawEvent {
+  final Object content;
+
+  OnSaveFile(this.content);
+}
