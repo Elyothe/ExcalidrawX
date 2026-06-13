@@ -15,6 +15,6 @@ class CreateDrawerUseCase {
     Uint8List data, {
     required String name,
   }) {
-    return _drawerRepository.saveFile(data, name: name);
+    return _drawerRepository.createDrawer(data, name: name);
   }
 }

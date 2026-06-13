@@ -13,7 +13,7 @@ class DrawerRepositoryImplementation implements DrawerRepository {
   /// Opens a "Save As" dialog with [name] (adds `.excalidraw` if missing).
   /// Returns the saved file path, or `null` if the user cancelled.
   @override
-  Future<Either<DrawerError, String>> saveFile(
+  Future<Either<DrawerError, String>> createDrawer(
     Uint8List data, {
     required String name,
   }) async {
@@ -45,7 +45,7 @@ class DrawerRepositoryImplementation implements DrawerRepository {
   /// Opens a file picker to select an existing `.excalidraw` file.
   /// Returns the selected file path on success.
   @override
-  Future<Either<DrawerOpenFailure, String>> openFile(
+  Future<Either<DrawerOpenFailure, String>> openDrawer(
     Uint8List data, {
     required String name,
   }) async {
