@@ -6,6 +6,12 @@ final class DrawerSaveFailure extends DrawerError {
   DrawerSaveFailure(this.message, {this.underlying});
 }
 
+final class DrawerCreateFailure extends DrawerError {
+  final String message;
+  final Object? underlying;
+  DrawerCreateFailure(this.message, {this.underlying});
+}
+
 final class DrawerOpenFailure extends DrawerError {
   final String message;
   final Object? underlying;

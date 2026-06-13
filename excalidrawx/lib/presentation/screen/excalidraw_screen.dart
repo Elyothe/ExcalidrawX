@@ -98,7 +98,6 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
         'localStorage.getItem("excalidraw",)',
       );
       if (result != null){
-        //logger.i("Content: $result");
         _excalidrawBloc.add(OnSaveFile(result));
       }
   }

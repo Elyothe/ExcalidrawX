@@ -56,41 +56,18 @@ class ExcalidrawBloc extends Bloc<ExcalidrawEvent, ExcalidrawState> {
       OnSaveFile event, Emitter<ExcalidrawState> emit) async {
     if (_currentFilePath == null) return;
 
-    try {
-      final openDrawerUseCase = getIt.get<OpenDrawerUseCase>();
-      final fileResult = await openDrawerUseCase(_currentFilePath!);
+    final saveDrawerUseCase = getIt.get<SaveDrawerUseCase>();
+    final result = await saveDrawerUseCase(
+      _currentFilePath!,
+      jsonDecode(event.content.toString()) as List<dynamic>,
+    );
 
-      await fileResult.fold(
-        (error) async => emit(state.copyWith(
-          status: ExcalidrawStatus.failure,
-          errorMessage: error.message,
-        )),
-        (fileContent) async {
-          final scene = jsonDecode(fileContent) as Map<String, dynamic>;
-          final newElements =
-              jsonDecode(event.content.toString()) as List<dynamic>;
-          scene['elements'] = newElements;
-
-          final saveDrawerUseCase = getIt.get<SaveDrawerUseCase>();
-          final saveResult = await saveDrawerUseCase(
-            _currentFilePath!,
-            jsonEncode(scene),
-          );
-
-          saveResult.fold(
-            (error) => emit(state.copyWith(
-              status: ExcalidrawStatus.failure,
-              errorMessage: error.message,
-            )),
-            (_) => emit(state.copyWith(status: ExcalidrawStatus.success)),
-          );
-        },
-      );
-    } catch (e) {
-      emit(state.copyWith(
+    result.fold(
+      (error) => emit(state.copyWith(
         status: ExcalidrawStatus.failure,
-        errorMessage: 'Erreur lors de la sauvegarde',
-      ));
-    }
+        errorMessage: error.message,
+      )),
+      (_) => emit(state.copyWith(status: ExcalidrawStatus.success)),
+    );
   }
 }

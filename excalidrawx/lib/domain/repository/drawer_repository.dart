@@ -13,4 +13,11 @@ abstract class DrawerRepository {
       Uint8List data, {
         required String name,
       });
+
+  Future<Either<DrawerOpenFailure, String>> readDrawer(String filePath);
+
+  Future<Either<DrawerSaveFailure, Unit>> saveDrawer(
+    String filePath,
+    String content,
+  );
 }

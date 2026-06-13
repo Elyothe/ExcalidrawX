@@ -50,10 +50,14 @@ class Locator {
         )
     );
     getIt.registerLazySingleton(
-            () => OpenDrawerUseCase()
+            () => OpenDrawerUseCase(
+          drawerRepository: getIt<DrawerRepository>(),
+        )
     );
     getIt.registerLazySingleton(
-            () => SaveDrawerUseCase()
+            () => SaveDrawerUseCase(
+          drawerRepository: getIt<DrawerRepository>(),
+        )
     );
   }
 }
