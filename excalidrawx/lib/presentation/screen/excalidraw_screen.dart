@@ -64,6 +64,7 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
   @override
   void dispose() {
     widget.filePathNotifier.removeListener(_onFilePathReceived);
+    _autosaveTimer?.cancel();
     _excalidrawBloc.close();
     super.dispose();
   }
@@ -71,6 +72,7 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
   void _onFilePathReceived() {
     final filePath = widget.filePathNotifier.value;
     if (filePath == null) return;
+    _lastWrittenData = null;
     _excalidrawBloc.add(OnOpenFile(filePath));
   }
 
@@ -82,6 +84,23 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
       );
       window.location.reload();
     ''');
+  }
+
+  void _startAutosaveTimer() {
+    _autosaveTimer?.cancel();
+    _autosaveTimer = Timer.periodic(
+      const Duration(seconds: 5),
+      (_) => _autosaveTick(),
+    );
+  }
+
+  Future<void> _autosaveTick() async {
+      final result = await _controller.runJavaScriptReturningResult(
+        'localStorage.getItem("excalidraw",)',
+      );
+      if (result != null){
+        _excalidrawBloc.add(OnSaveFile(result));
+      }
   }
 
   @override

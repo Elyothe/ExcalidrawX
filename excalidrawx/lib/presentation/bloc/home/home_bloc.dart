@@ -12,7 +12,6 @@ import 'package:dart_mappable/dart_mappable.dart';
 
 import '../../../core/logger/logger_setup.dart';
 import 'package:excalidrawx/domain/usecase/delete_folder_usecase.dart';
-import '../../../domain/entities/error/directory_error.dart';
 
 
 part 'home_event.dart';
@@ -42,7 +41,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         DrawerCancellation _ => emit(state.copyWith(
             status: HomeStatus.initial,
           )),
-        DrawerSaveFailure(:final message) => emit(state.copyWith(
+        DrawerCreateFailure(:final message) => emit(state.copyWith(
             status: HomeStatus.failure,
             errorMessage: message,
           )),
