@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:bloc/bloc.dart';
 import 'package:dart_mappable/dart_mappable.dart';
 import 'package:excalidrawx/core/locator.dart';
@@ -52,21 +50,10 @@ class ExcalidrawBloc extends Bloc<ExcalidrawEvent, ExcalidrawState> {
         status: ExcalidrawStatus.failure,
         errorMessage: error.message,
       )),
-      (content) {
-        try {
-          final scene = jsonDecode(content) as Map<String, dynamic>;
-          final elements = scene['elements'] as List<dynamic>;
-          emit(state.copyWith(
-            status: ExcalidrawStatus.success,
-            elements: elements,
-          ));
-        } catch (e) {
-          emit(state.copyWith(
-            status: ExcalidrawStatus.failure,
-            errorMessage: "Erreur lors de l'ouverture du fichier",
-          ));
-        }
-      },
+      (elements) => emit(state.copyWith(
+        status: ExcalidrawStatus.success,
+        elements: elements,
+      )),
     );
   }
 
@@ -77,7 +64,7 @@ class ExcalidrawBloc extends Bloc<ExcalidrawEvent, ExcalidrawState> {
     final saveDrawerUseCase = getIt.get<SaveDrawerUseCase>();
     final result = await saveDrawerUseCase(
       _currentFilePath!,
-      jsonDecode(event.content.toString()) as List<dynamic>,
+      event.content.toString(),
     );
 
     result.fold(

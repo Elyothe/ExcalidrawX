@@ -8,6 +8,6 @@ class OpenDrawerUseCase {
   OpenDrawerUseCase({required DrawerRepository drawerRepository})
       : _drawerRepository = drawerRepository;
 
-  Future<Either<DrawerOpenFailure, String>> call(String filePath) =>
+  Future<Either<DrawerOpenFailure, List<dynamic>>> call(String filePath) =>
       _drawerRepository.readDrawer(filePath);
 }

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -54,46 +55,65 @@ class DrawerRepositoryImplementation implements DrawerRepository {
     }
   }
 
-  /// Reads the file at [filePath]. Reuses a matching bookmark or creates a
-  /// new one, accessing the resource inside a security-scoped block.
+  /// Reads and parses the Excalidraw file at [filePath], returning its
+  /// elements. Reuses a matching bookmark or creates a new one, accessing
+  /// the resource inside a security-scoped block.
   @override
-  Future<Either<DrawerOpenFailure, String>> readDrawer(String filePath) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final existingBookmark = prefs.getString(SharedPrefsKeys.currentDrawerBookmark);
-      final file = File(filePath).absolute;
+  Future<Either<DrawerOpenFailure, List<dynamic>>> readDrawer(
+    String filePath,
+  ) async {
+    final rawResult = await _readFileContent(filePath);
 
-      final (resolvedFile, bookmark) = await _resolveOrCreateBookmark(
-        file,
-        existingBookmark,
-      );
-      await prefs.setString(SharedPrefsKeys.currentDrawerBookmark, bookmark);
-
-      await _secureBookmarks.startAccessingSecurityScopedResource(resolvedFile);
+    return rawResult.fold(Left.new, (content) {
       try {
-        final content = await resolvedFile.readAsString();
-        logger.i("File read (bookmark): ${resolvedFile.path}");
-        return Right(content);
-      } finally {
-        await _secureBookmarks.stopAccessingSecurityScopedResource(resolvedFile);
+        final scene = jsonDecode(content) as Map<String, dynamic>;
+        final elements = scene['elements'] as List<dynamic>;
+        logger.i("File parsed (bookmark): $filePath");
+        return Right(elements);
+      } catch (e) {
+        logger.e("Parse file error $e");
+        return Left(DrawerOpenFailure(
+          "Le fichier est corrompu ou n'est pas un fichier Excalidraw valide",
+          underlying: e,
+        ));
       }
-    } catch (e) {
-      logger.e("Read file error $e");
-      return Left(DrawerOpenFailure(
-        'Erreur lors de la lecture du fichier',
-        underlying: e,
-      ));
-    }
+    });
   }
 
-  /// Writes [content] to the file at [filePath]. Reuses a matching bookmark
+  /// Reads the raw content of the file at [filePath]. Reuses a matching
+  /// bookmark or creates a new one, accessing the resource inside a
+  /// security-scoped block.
+  @override
+  Future<Either<DrawerOpenFailure, String>> readDrawerRaw(String filePath) =>
+      _readFileContent(filePath);
+
+  /// Merges the provided [elementsJson] into the existing Excalidraw file at
+  /// [filePath], then writes the updated scene back. Reuses a matching bookmark
   /// or creates a new one, accessing the resource inside a security-scoped block.
   @override
   Future<Either<DrawerSaveFailure, Unit>> saveDrawer(
     String filePath,
-    String content,
+    String elementsJson,
   ) async {
+    final rawResult = await _readFileContent(filePath);
+
+    final String contentString;
+    switch (rawResult) {
+      case Left(value: final error):
+        return Left(DrawerSaveFailure(
+          error.message,
+          underlying: error.underlying,
+        ));
+      case Right(value: final content):
+        contentString = content;
+    }
+
     try {
+      final scene = jsonDecode(contentString) as Map<String, dynamic>;
+      final newElements = jsonDecode(elementsJson) as List<dynamic>;
+      scene['elements'] = newElements;
+      final encodedScene = jsonEncode(scene);
+
       final prefs = await SharedPreferences.getInstance();
       final existingBookmark = prefs.getString(SharedPrefsKeys.currentDrawerBookmark);
       final file = File(filePath).absolute;
@@ -106,7 +126,7 @@ class DrawerRepositoryImplementation implements DrawerRepository {
 
       await _secureBookmarks.startAccessingSecurityScopedResource(resolvedFile);
       try {
-        await resolvedFile.writeAsString(content);
+        await resolvedFile.writeAsString(encodedScene);
         logger.i("File saved (bookmark): ${resolvedFile.path}");
       } finally {
         await _secureBookmarks.stopAccessingSecurityScopedResource(resolvedFile);
@@ -143,6 +163,39 @@ class DrawerRepositoryImplementation implements DrawerRepository {
       await prefs.remove(SharedPrefsKeys.currentDrawerBookmark);
       logger.i("Removed stale bookmark from SharedPreferences");
       return const Right(null);
+    }
+  }
+
+  /// Reads the raw string content of the file at [filePath], handling
+  /// security-scoped bookmarks and I/O errors.
+  Future<Either<DrawerOpenFailure, String>> _readFileContent(
+    String filePath,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final existingBookmark = prefs.getString(SharedPrefsKeys.currentDrawerBookmark);
+      final file = File(filePath).absolute;
+
+      final (resolvedFile, bookmark) = await _resolveOrCreateBookmark(
+        file,
+        existingBookmark,
+      );
+      await prefs.setString(SharedPrefsKeys.currentDrawerBookmark, bookmark);
+
+      await _secureBookmarks.startAccessingSecurityScopedResource(resolvedFile);
+      try {
+        final content = await resolvedFile.readAsString();
+        logger.i("File read (bookmark): ${resolvedFile.path}");
+        return Right(content);
+      } finally {
+        await _secureBookmarks.stopAccessingSecurityScopedResource(resolvedFile);
+      }
+    } catch (e) {
+      logger.e("Read file error $e");
+      return Left(DrawerOpenFailure(
+        'Erreur lors de la lecture du fichier',
+        underlying: e,
+      ));
     }
   }
 

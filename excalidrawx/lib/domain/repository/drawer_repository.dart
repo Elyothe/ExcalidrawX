@@ -11,11 +11,13 @@ abstract class DrawerRepository {
 
   //Future<Either<DrawerOpenFailure, String>> openDrawer(String data);
 
-  Future<Either<DrawerOpenFailure, String>> readDrawer(String filePath);
+  Future<Either<DrawerOpenFailure, List<dynamic>>> readDrawer(String filePath);
+
+  Future<Either<DrawerOpenFailure, String>> readDrawerRaw(String filePath);
 
   Future<Either<DrawerSaveFailure, Unit>> saveDrawer(
     String filePath,
-    String content,
+    String elementsJson,
   );
 
   Future<Either<DrawerOpenFailure, String?>> getCurrentDrawerPath();
