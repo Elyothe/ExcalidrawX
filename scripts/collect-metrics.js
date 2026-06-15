@@ -45,38 +45,77 @@ function execCommand(command) {
   }
 }
 
+function extractTokenCounts(obj) {
+  if (!obj || typeof obj !== 'object') return null;
+
+  const prompt =
+    obj.promptTokens ??
+    obj.prompt_tokens ??
+    obj.inputTokens ??
+    obj.input_tokens;
+
+  const completion =
+    obj.completionTokens ??
+    obj.completion_tokens ??
+    obj.outputTokens ??
+    obj.output_tokens;
+
+  const total = obj.totalTokens ?? obj.total_tokens;
+
+  if (prompt === undefined && completion === undefined && total === undefined) {
+    return null;
+  }
+
+  const p = Number(prompt) || 0;
+  const c = Number(completion) || 0;
+  const t = Number(total) || p + c;
+
+  return { prompt_tokens: p, completion_tokens: c, total_tokens: t };
+}
+
 function findTokenUsage(data) {
-  const candidates = [
-    data?.usage,
-    data?.statistics,
-    data?.tokenUsage,
-    data?.metrics,
-  ];
+  // 1. Top-level usage fields
+  const topLevel = extractTokenCounts(data);
+  if (topLevel) return topLevel;
 
-  for (const candidate of candidates) {
-    if (!candidate || typeof candidate !== 'object') continue;
+  // 2. Inside info object
+  if (data?.info) {
+    const infoTokens = extractTokenCounts(data.info);
+    if (infoTokens) return infoTokens;
+  }
 
-    const prompt =
-      candidate.promptTokens ??
-      candidate.prompt_tokens ??
-      candidate.inputTokens ??
-      candidate.input_tokens;
+  // 3. Inside explicit usage object
+  if (data?.usage) {
+    const usageTokens = extractTokenCounts(data.usage);
+    if (usageTokens) return usageTokens;
+  }
 
-    const completion =
-      candidate.completionTokens ??
-      candidate.completion_tokens ??
-      candidate.outputTokens ??
-      candidate.output_tokens;
+  // 4. Sum token counts from the messages array
+  if (Array.isArray(data?.messages)) {
+    let prompt = 0;
+    let completion = 0;
+    let total = 0;
+    let found = false;
 
-    const total =
-      candidate.totalTokens ??
-      candidate.total_tokens;
+    for (const msg of data.messages) {
+      const tokens = extractTokenCounts(msg);
+      if (tokens) {
+        found = true;
+        prompt += tokens.prompt_tokens;
+        completion += tokens.completion_tokens;
+        total += tokens.total_tokens;
+      } else if (typeof msg.tokens === 'number') {
+        found = true;
+        total += msg.tokens;
+      }
+    }
 
-    if (prompt !== undefined || completion !== undefined || total !== undefined) {
-      const p = Number(prompt) || 0;
-      const c = Number(completion) || 0;
-      const t = Number(total) || p + c;
-      return { prompt_tokens: p, completion_tokens: c, total_tokens: t };
+    if (found) {
+      return {
+        prompt_tokens: prompt,
+        completion_tokens: completion,
+        total_tokens: total || prompt + completion,
+      };
     }
   }
 
@@ -110,6 +149,12 @@ function extractTokenUsage() {
     if (!tokens) {
       console.warn('⚠️  Token usage not found in session export');
       console.warn('   Export keys:', Object.keys(sessionData || {}).join(', '));
+      if (sessionData?.info) {
+        console.warn('   Info keys:', Object.keys(sessionData.info).join(', '));
+      }
+      if (Array.isArray(sessionData?.messages) && sessionData.messages.length > 0) {
+        console.warn('   First message keys:', Object.keys(sessionData.messages[0]).join(', '));
+      }
       return null;
     }
 
