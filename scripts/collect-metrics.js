@@ -4,6 +4,7 @@
 // Zero-dependency: uses Node 20 native fetch() and built-in child_process.
 
 import { execSync } from 'child_process';
+import { readFileSync } from 'fs';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -122,7 +123,7 @@ function extractTokenUsage() {
 async function main() {
   try {
     // 1. Read GitHub event context
-    const event = JSON.parse(require('fs').readFileSync(GITHUB_EVENT_PATH, 'utf8'));
+    const event = JSON.parse(readFileSync(GITHUB_EVENT_PATH, 'utf8'));
     const pr = event.pull_request;
     if (!pr) {
       console.log('⚠️  Not a PR event, skipping metrics.');
