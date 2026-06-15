@@ -34,7 +34,7 @@ class ExcalidrawBloc extends Bloc<ExcalidrawEvent, ExcalidrawState> {
         status: ExcalidrawStatus.failure,
         errorMessage: error.message,
       )),
-      
+
       (content) {
         try {
           final scene = jsonDecode(content) as Map<String, dynamic>;
