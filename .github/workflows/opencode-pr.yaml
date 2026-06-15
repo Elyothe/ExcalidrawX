@@ -70,4 +70,6 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           WORKFLOW_START_TIME: ${{ env.WORKFLOW_START_TIME }}
           JOB_STATUS: ${{ job.status }}
-        run: node scripts/collect-metrics.js
+        run: |
+          export PATH="$HOME/.opencode/bin:$PATH"
+          node scripts/collect-metrics.js

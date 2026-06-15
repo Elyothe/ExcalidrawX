@@ -1,7 +1,9 @@
 // scripts/collect-metrics.js
 // Collects workflow metrics and pushes them to Supabase.
 // Runs as a post-step in the opencode-pr-review GitHub Actions workflow.
-// Zero-dependency: uses Node 20 native fetch().
+// Zero-dependency: uses Node 20 native fetch() and built-in child_process.
+
+import { execSync } from 'child_process';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -27,6 +29,94 @@ async function supabasePost(table, body) {
   }
 
   return res.json();
+}
+
+function execCommand(command) {
+  try {
+    return execSync(command, {
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+  } catch (error) {
+    console.warn(`⚠️  Command failed: ${command}`);
+    console.warn(`    ${error.stderr || error.message}`);
+    return null;
+  }
+}
+
+function findTokenUsage(data) {
+  const candidates = [
+    data?.usage,
+    data?.statistics,
+    data?.tokenUsage,
+    data?.metrics,
+  ];
+
+  for (const candidate of candidates) {
+    if (!candidate || typeof candidate !== 'object') continue;
+
+    const prompt =
+      candidate.promptTokens ??
+      candidate.prompt_tokens ??
+      candidate.inputTokens ??
+      candidate.input_tokens;
+
+    const completion =
+      candidate.completionTokens ??
+      candidate.completion_tokens ??
+      candidate.outputTokens ??
+      candidate.output_tokens;
+
+    const total =
+      candidate.totalTokens ??
+      candidate.total_tokens;
+
+    if (prompt !== undefined || completion !== undefined || total !== undefined) {
+      const p = Number(prompt) || 0;
+      const c = Number(completion) || 0;
+      const t = Number(total) || p + c;
+      return { prompt_tokens: p, completion_tokens: c, total_tokens: t };
+    }
+  }
+
+  return null;
+}
+
+function extractTokenUsage() {
+  try {
+    // 1. Find the latest opencode session created by the review step.
+    const sessionListOutput = execCommand(
+      'opencode session list --format json --max-count 1'
+    );
+    if (!sessionListOutput) return null;
+
+    const sessions = JSON.parse(sessionListOutput);
+    const session = Array.isArray(sessions) ? sessions[0] : sessions;
+    if (!session || !session.id) {
+      console.warn('⚠️  No opencode session found');
+      return null;
+    }
+
+    console.log(`🔍 Found opencode session: ${session.id}`);
+
+    // 2. Export the full session JSON (contains token usage).
+    const exportOutput = execCommand(`opencode export ${session.id}`);
+    if (!exportOutput) return null;
+
+    const sessionData = JSON.parse(exportOutput);
+    const tokens = findTokenUsage(sessionData);
+
+    if (!tokens) {
+      console.warn('⚠️  Token usage not found in session export');
+      console.warn('   Export keys:', Object.keys(sessionData || {}).join(', '));
+      return null;
+    }
+
+    return tokens;
+  } catch (error) {
+    console.warn(`⚠️  Token extraction failed: ${error.message}`);
+    return null;
+  }
 }
 
 async function main() {
@@ -68,12 +158,20 @@ async function main() {
     console.log(`✅ Metrics saved for PR #${pr.number} (run id: ${run.id})`);
     console.log(`   Duration: ${durationSeconds}s | Cost: $${cost.toFixed(4)} | Energy: ${energy.toFixed(6)} kWh`);
 
-    // 5. Token usage — placeholder until we instrument openCode output.
-    // Possible strategies:
-    //   a) Pipe openCode stdout to a file and parse token counts.
-    //   b) Use a --verbose flag if openCode exposes one.
-    //   c) Call the underlying API directly to capture usage.* fields.
-    console.log('⚠️  Token capture not yet implemented — see DASHBOARD.md §11.1');
+    // 5. Extract token usage from the opencode session created above.
+    const tokens = extractTokenUsage();
+    if (tokens) {
+      const CONTEXT_WINDOW = 128000; // DeepSeek v4 context window
+      await supabasePost('token_usage', {
+        run_id: run.id,
+        model: 'opencode/deepseek-v4-flash-free',
+        prompt_tokens: tokens.prompt_tokens,
+        completion_tokens: tokens.completion_tokens,
+        total_tokens: tokens.total_tokens,
+        estimated_remaining: Math.max(0, CONTEXT_WINDOW - tokens.total_tokens),
+      });
+      console.log(`   Tokens: ${tokens.total_tokens} total (${tokens.prompt_tokens} prompt + ${tokens.completion_tokens} completion)`);
+    }
   } catch (error) {
     console.error('❌ Metrics collection failed:', error.message);
     // Do not fail the workflow because of a metrics error.
