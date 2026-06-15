@@ -78,21 +78,32 @@ function findTokenUsage(data) {
   const topLevel = extractTokenCounts(data);
   if (topLevel) return topLevel;
 
-  // 2. Inside info.tokens (may be a number, string, or object)
-  if (data?.info) {
-    if (typeof data.info.tokens === 'number' || typeof data.info.tokens === 'string') {
-      const total = Number(data.info.tokens);
-      if (!isNaN(total)) {
-        return { prompt_tokens: 0, completion_tokens: 0, total_tokens: total };
-      }
-    }
-    if (data.info.tokens && typeof data.info.tokens === 'object') {
-      const infoTokens = extractTokenCounts(data.info.tokens);
-      if (infoTokens) return infoTokens;
-    }
+  // 2. Inside info.tokens (openCode format: { input, output, reasoning, cache })
+  if (data?.info?.tokens && typeof data.info.tokens === 'object') {
+    const tk = data.info.tokens;
+    const input = Number(tk.input) || 0;
+    const output = Number(tk.output) || 0;
+    const reasoning = Number(tk.reasoning) || 0;
 
+    if (input || output || reasoning) {
+      return {
+        prompt_tokens: input,
+        completion_tokens: output + reasoning,
+        total_tokens: input + output + reasoning,
+      };
+    }
+  }
+
+  // 3. Generic info-level usage fields
+  if (data?.info) {
     const infoTokens = extractTokenCounts(data.info);
     if (infoTokens) return infoTokens;
+  }
+
+  // 4. Inside explicit usage object
+  if (data?.usage) {
+    const usageTokens = extractTokenCounts(data.usage);
+    if (usageTokens) return usageTokens;
   }
 
   // 3. Inside explicit usage object
