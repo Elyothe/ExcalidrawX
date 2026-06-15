@@ -32,36 +32,41 @@ jobs:
           model: opencode/deepseek-v4-flash-free
           use_github_token: true
           prompt: |
-            Réponds en français. Review this pull request. Do NOT modify any code.
+            Réponds en français. Fais une review très courte de cette pull request.
+            Ne modifie aucun code. Un seul commentaire global avec 2-3 remarques maximum.
 
-            PR Number: ${{ github.event.pull_request.number }}
-
-            IMPORTANT: Pour chaque problème trouvé, utilise OBLIGATOIREMENT la commande suivante pour poster un commentaire inline sur la ligne exacte du fichier :
-
-            ```bash
-            gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments \
-              -f body="🔴 **Rubrique** : description" \
-              -f commit_id="HEAD" \
-              -f path="chemin/du/fichier" \
-              -f line=42
-            ```
-
-            Organise les commentaires PAR RUBRIQUE (une commande gh par ligne problématique) :
-
-            ## 🔴 Bugs
-            Signale chaque bug sur sa ligne exacte.
-
-            ## 🟠 Sécurité
-            Signale chaque faille sur sa ligne exacte (hardcoded secrets, injection, validation absente).
-
-            ## 🟡 Qualité de code / Conventions Dart/Flutter
-            Signale sur les lignes exactes (const manquant, naming, patterns dépréciés).
-
-            ## 🔵 Architecture
-            Signale sur les lignes exactes (UI/logique mélangée, service dépendant de BuildContext).
-
-            ## ✅ Résumé
-            Un seul commentaire global de résumé (pas inline) avec les points critiques.
+          # ─── PROMPT PRODUCTION (à réactiver quand les tests sont terminés) ───
+          # prompt: |
+          #   Réponds en français. Review this pull request. Do NOT modify any code.
+          #
+          #   PR Number: ${{ github.event.pull_request.number }}
+          #
+          #   IMPORTANT: Pour chaque problème trouvé, utilise OBLIGATOIREMENT la commande suivante pour poster un commentaire inline sur la ligne exacte du fichier :
+          #
+          #   ```bash
+          #   gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments \
+          #     -f body="🔴 **Rubrique** : description" \
+          #     -f commit_id="HEAD" \
+          #     -f path="chemin/du/fichier" \
+          #     -f line=42
+          #   ```
+          #
+          #   Organise les commentaires PAR RUBRIQUE (une commande gh par ligne problématique) :
+          #
+          #   ## 🔴 Bugs
+          #   Signale chaque bug sur sa ligne exacte.
+          #
+          #   ## 🟠 Sécurité
+          #   Signale chaque faille sur sa ligne exacte (hardcoded secrets, injection, validation absente).
+          #
+          #   ## 🟡 Qualité de code / Conventions Dart/Flutter
+          #   Signale sur les lignes exactes (const manquant, naming, patterns dépréciés).
+          #
+          #   ## 🔵 Architecture
+          #   Signale sur les lignes exactes (UI/logique mélangée, service dépendant de BuildContext).
+          #
+          #   ## ✅ Résumé
+          #   Un seul commentaire global de résumé (pas inline) avec les points critiques.
 
       - name: Collect metrics
         if: always()
