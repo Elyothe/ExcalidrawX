@@ -78,8 +78,16 @@ function findTokenUsage(data) {
   const topLevel = extractTokenCounts(data);
   if (topLevel) return topLevel;
 
-  // 2. Inside info object
+  // 2. Inside info.tokens (may be a number or an object)
   if (data?.info) {
+    if (typeof data.info.tokens === 'number') {
+      return { prompt_tokens: 0, completion_tokens: 0, total_tokens: data.info.tokens };
+    }
+    if (typeof data.info.tokens === 'object') {
+      const infoTokens = extractTokenCounts(data.info.tokens);
+      if (infoTokens) return infoTokens;
+    }
+
     const infoTokens = extractTokenCounts(data.info);
     if (infoTokens) return infoTokens;
   }
