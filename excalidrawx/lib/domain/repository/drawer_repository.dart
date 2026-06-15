@@ -9,10 +9,7 @@ abstract class DrawerRepository {
     required String name,
   });
 
-  Future<Either<DrawerOpenFailure, String>> openDrawer(
-      Uint8List data, {
-        required String name,
-      });
+  //Future<Either<DrawerOpenFailure, String>> openDrawer(String data);
 
   Future<Either<DrawerOpenFailure, String>> readDrawer(String filePath);
 
@@ -20,4 +17,6 @@ abstract class DrawerRepository {
     String filePath,
     String content,
   );
+
+  Future<Either<DrawerOpenFailure, String?>> getCurrentDrawerPath();
 }

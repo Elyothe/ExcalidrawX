@@ -8,6 +8,8 @@ class OnOpenFile extends ExcalidrawEvent {
   OnOpenFile(this.filePath);
 }
 
+class OnInit extends ExcalidrawEvent {}
+
 class OnSaveFile extends ExcalidrawEvent {
   final Object content;
 
