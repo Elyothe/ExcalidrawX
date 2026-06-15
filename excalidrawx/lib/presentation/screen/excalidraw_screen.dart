@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:excalidrawx/core/logger/logger_setup.dart';
 import 'package:excalidrawx/presentation/bloc/excalidraw/excalidraw_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,7 +24,8 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
   bool _isLoading = true;
   String? _errorMessage;
   Timer? _autosaveTimer;
-  String? _lastWrittenData;
+  bool _isPageLoaded = false;
+  List<dynamic>? _pendingElements;
 
   @override
   void initState() {
@@ -41,12 +41,17 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
               _isLoading = true;
               _errorMessage = null;
             });
+            _isPageLoaded = false;
             _autosaveTimer?.cancel();
           },
           onPageFinished: (String url) {
             setState(() {
               _isLoading = false;
             });
+            _isPageLoaded = true;
+            if (_pendingElements != null) {
+              _injectScene(_pendingElements!);
+            }
             _startAutosaveTimer();
           },
           onWebResourceError: (WebResourceError error) {
@@ -71,11 +76,15 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
   void _onFilePathReceived() {
     final filePath = widget.filePathNotifier.value;
     if (filePath == null) return;
-    _lastWrittenData = null;
     _excalidrawBloc.add(OnOpenFile(filePath));
   }
 
   Future<void> _injectScene(List<dynamic> elements) async {
+    if (!_isPageLoaded) {
+      _pendingElements = elements;
+      return;
+    }
+    _pendingElements = null;
     await _controller.runJavaScript('''
       localStorage.setItem(
         "excalidraw",
@@ -94,12 +103,14 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
   }
 
   Future<void> _autosaveTick() async {
-      final result = await _controller.runJavaScriptReturningResult(
-        'localStorage.getItem("excalidraw",)',
-      );
-      if (result != null){
-        _excalidrawBloc.add(OnSaveFile(result));
-      }
+    if (!_isPageLoaded) return;
+
+    final result = await _controller.runJavaScriptReturningResult(
+      'localStorage.getItem("excalidraw")',
+    );
+    if (result != null) {
+      _excalidrawBloc.add(OnSaveFile(result));
+    }
   }
 
   @override
