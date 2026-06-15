@@ -78,12 +78,15 @@ function findTokenUsage(data) {
   const topLevel = extractTokenCounts(data);
   if (topLevel) return topLevel;
 
-  // 2. Inside info.tokens (may be a number or an object)
+  // 2. Inside info.tokens (may be a number, string, or object)
   if (data?.info) {
-    if (typeof data.info.tokens === 'number') {
-      return { prompt_tokens: 0, completion_tokens: 0, total_tokens: data.info.tokens };
+    if (typeof data.info.tokens === 'number' || typeof data.info.tokens === 'string') {
+      const total = Number(data.info.tokens);
+      if (!isNaN(total)) {
+        return { prompt_tokens: 0, completion_tokens: 0, total_tokens: total };
+      }
     }
-    if (typeof data.info.tokens === 'object') {
+    if (data.info.tokens && typeof data.info.tokens === 'object') {
       const infoTokens = extractTokenCounts(data.info.tokens);
       if (infoTokens) return infoTokens;
     }
@@ -159,9 +162,18 @@ function extractTokenUsage() {
       console.warn('   Export keys:', Object.keys(sessionData || {}).join(', '));
       if (sessionData?.info) {
         console.warn('   Info keys:', Object.keys(sessionData.info).join(', '));
+        console.warn('   info.tokens type:', typeof sessionData.info.tokens);
+        if (sessionData.info.tokens && typeof sessionData.info.tokens === 'object') {
+          console.warn('   info.tokens keys:', Object.keys(sessionData.info.tokens).join(', '));
+        } else if (sessionData.info.tokens !== undefined) {
+          console.warn('   info.tokens value:', sessionData.info.tokens);
+        }
       }
       if (Array.isArray(sessionData?.messages) && sessionData.messages.length > 0) {
         console.warn('   First message keys:', Object.keys(sessionData.messages[0]).join(', '));
+        if (sessionData.messages[0]?.info) {
+          console.warn('   First message.info keys:', Object.keys(sessionData.messages[0].info).join(', '));
+        }
       }
       return null;
     }
