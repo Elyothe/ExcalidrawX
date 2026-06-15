@@ -7,6 +7,7 @@ import 'package:excalidrawx/domain/usecase/create_drawer_usecase.dart';
 import 'package:excalidrawx/domain/usecase/delete_folder_usecase.dart';
 import 'package:excalidrawx/domain/usecase/get_exists_folder_usecase.dart';
 import 'package:excalidrawx/domain/usecase/open_drawer_usecase.dart';
+import 'package:excalidrawx/domain/usecase/save_drawer_usecase.dart';
 import 'package:excalidrawx/domain/usecase/select_folder_usecase.dart';
 import 'package:get_it/get_it.dart';
 
@@ -49,7 +50,14 @@ class Locator {
         )
     );
     getIt.registerLazySingleton(
-            () => OpenDrawerUseCase()
+            () => OpenDrawerUseCase(
+          drawerRepository: getIt<DrawerRepository>(),
+        )
+    );
+    getIt.registerLazySingleton(
+            () => SaveDrawerUseCase(
+          drawerRepository: getIt<DrawerRepository>(),
+        )
     );
   }
 }

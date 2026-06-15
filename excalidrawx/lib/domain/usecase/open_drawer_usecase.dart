@@ -1,18 +1,13 @@
-import 'dart:io';
-
 import 'package:excalidrawx/domain/entities/error/drawer_error.dart';
+import 'package:excalidrawx/domain/repository/drawer_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
 class OpenDrawerUseCase {
-  Future<Either<DrawerOpenFailure, String>> call(String filePath) async {
-    try {
-      final content = await File(filePath).readAsString();
-      return Right(content);
-    } catch (e) {
-      return Left(DrawerOpenFailure(
-        'Erreur lors de la lecture du fichier',
-        underlying: e,
-      ));
-    }
-  }
+  final DrawerRepository _drawerRepository;
+
+  OpenDrawerUseCase({required DrawerRepository drawerRepository})
+      : _drawerRepository = drawerRepository;
+
+  Future<Either<DrawerOpenFailure, String>> call(String filePath) =>
+      _drawerRepository.readDrawer(filePath);
 }
