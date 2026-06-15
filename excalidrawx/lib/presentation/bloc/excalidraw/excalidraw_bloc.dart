@@ -35,6 +35,7 @@ class ExcalidrawBloc extends Bloc<ExcalidrawEvent, ExcalidrawState> {
             elements: elements,
           ));
         } catch (e) {
+          
           emit(state.copyWith(
             status: ExcalidrawStatus.failure,
             errorMessage: "Erreur lors de l'ouverture du fichier",
