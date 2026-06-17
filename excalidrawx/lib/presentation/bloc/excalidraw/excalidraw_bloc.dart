@@ -1,8 +1,7 @@
-import 'dart:convert';
-
 import 'package:bloc/bloc.dart';
 import 'package:dart_mappable/dart_mappable.dart';
 import 'package:excalidrawx/core/locator.dart';
+import 'package:excalidrawx/domain/usecase/restore_current_drawer_usecase.dart';
 import 'package:excalidrawx/domain/usecase/open_drawer_usecase.dart';
 import 'package:excalidrawx/domain/usecase/save_drawer_usecase.dart';
 
@@ -16,8 +15,25 @@ class ExcalidrawBloc extends Bloc<ExcalidrawEvent, ExcalidrawState> {
   String? get currentFilePath => _currentFilePath;
 
   ExcalidrawBloc() : super(const ExcalidrawState()) {
+    on<OnInit>(_onInit);
     on<OnOpenFile>(_onOpenFile);
     on<OnSaveFile>(_onSaveFile);
+    add(OnInit());
+  }
+
+  Future<void> _onInit(
+      OnInit event, Emitter<ExcalidrawState> emit) async {
+    final restoreUseCase = getIt.get<RestoreCurrentDrawerUseCase>();
+    final result = await restoreUseCase();
+    result.fold(
+      (_) {},
+      (path) {
+        _currentFilePath = path;
+        if (path != null) {
+          add(OnOpenFile(path));
+        }
+      },
+    );
   }
 
   Future<void> _onOpenFile(
@@ -60,7 +76,7 @@ class ExcalidrawBloc extends Bloc<ExcalidrawEvent, ExcalidrawState> {
     final saveDrawerUseCase = getIt.get<SaveDrawerUseCase>();
     final result = await saveDrawerUseCase(
       _currentFilePath!,
-      jsonDecode(event.content.toString()) as List<dynamic>,
+      event.content.toString(),
     );
 
     result.fold(

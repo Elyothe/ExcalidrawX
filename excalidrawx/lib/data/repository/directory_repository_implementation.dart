@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/logger/logger_setup.dart';
+import '../constants/shared_prefs_keys.dart';
 
 class DirectoryRepositoryImplementation implements DirectoryRepository {
 
@@ -41,9 +42,9 @@ class DirectoryRepositoryImplementation implements DirectoryRepository {
   Future<Either<FolderDeleteFailure, String>> deleteFolder(String path) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final existingPaths = prefs.getStringList(_foldersKey) ?? [];
+      final existingPaths = prefs.getStringList(SharedPrefsKeys.savedFolders) ?? [];
       existingPaths.remove(path);
-      await prefs.setStringList(_foldersKey, existingPaths);
+      await prefs.setStringList(SharedPrefsKeys.savedFolders, existingPaths);
 
       logger.i("Folder removed from prefs: $path");
       return Right(path);
@@ -69,10 +70,10 @@ class DirectoryRepositoryImplementation implements DirectoryRepository {
       }
 
       final prefs = await SharedPreferences.getInstance();
-      final existingPaths = prefs.getStringList(_foldersKey) ?? [];
+      final existingPaths = prefs.getStringList(SharedPrefsKeys.savedFolders) ?? [];
       if (!existingPaths.contains(selectedPath)) {
         existingPaths.add(selectedPath);
-        await prefs.setStringList(_foldersKey, existingPaths);
+        await prefs.setStringList(SharedPrefsKeys.savedFolders, existingPaths);
       }
       logger.i("Folder selected and saved: $selectedPath");
 
@@ -89,7 +90,7 @@ class DirectoryRepositoryImplementation implements DirectoryRepository {
   Future<Either<FolderGetExistFailure, List<String>>> getFoldersExists() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final paths = prefs.getStringList(_foldersKey) ?? [];
+      final paths = prefs.getStringList(SharedPrefsKeys.savedFolders) ?? [];
       final existingPaths = paths.where((p) => Directory(p).existsSync()).toList();
       logger.i("Folders found: $existingPaths");
       return Right(existingPaths);

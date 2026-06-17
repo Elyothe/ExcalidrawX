@@ -72,11 +72,15 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
   void _onFilePathReceived() {
     final filePath = widget.filePathNotifier.value;
     if (filePath == null) return;
-    _lastWrittenData = null;
     _excalidrawBloc.add(OnOpenFile(filePath));
   }
 
   Future<void> _injectScene(List<dynamic> elements) async {
+    if (!_isPageLoaded) {
+      _pendingElements = elements;
+      return;
+    }
+    _pendingElements = null;
     await _controller.runJavaScript('''
       localStorage.setItem(
         "excalidraw",
@@ -95,12 +99,14 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
   }
 
   Future<void> _autosaveTick() async {
-      final result = await _controller.runJavaScriptReturningResult(
-        'localStorage.getItem("excalidraw",)',
-      );
-      if (result != null){
-        _excalidrawBloc.add(OnSaveFile(result));
-      }
+    if (!_isPageLoaded) return;
+
+    final result = await _controller.runJavaScriptReturningResult(
+      'localStorage.getItem("excalidraw")',
+    );
+    if (result != null) {
+      _excalidrawBloc.add(OnSaveFile(result));
+    }
   }
 
   @override
