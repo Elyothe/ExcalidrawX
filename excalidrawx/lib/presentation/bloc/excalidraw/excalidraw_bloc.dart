@@ -50,10 +50,22 @@ class ExcalidrawBloc extends Bloc<ExcalidrawEvent, ExcalidrawState> {
         status: ExcalidrawStatus.failure,
         errorMessage: error.message,
       )),
-      (elements) => emit(state.copyWith(
-        status: ExcalidrawStatus.success,
-        elements: elements,
-      )),
+
+      (content) {
+        try {
+          final scene = jsonDecode(content) as Map<String, dynamic>;
+          final elements = scene['elements'] as List<dynamic>;
+          emit(state.copyWith(
+            status: ExcalidrawStatus.success,
+            elements: elements,
+          ));
+        } catch (e) {
+          emit(state.copyWith(
+            status: ExcalidrawStatus.failure,
+            errorMessage: "Erreur lors de l'ouverture du fichier",
+          ));
+        }
+      },
     );
   }
 

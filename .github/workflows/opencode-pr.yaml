@@ -1,0 +1,83 @@
+name: opencode-pr-review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+      issues: read
+
+    steps:
+      - name: Record start time
+        run: echo "WORKFLOW_START_TIME=$(date +%s)" >> $GITHUB_ENV
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+
+
+
+      - name: Review PR with OpenCode
+        uses: anomalyco/opencode/github@latest  
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+        with:
+          model: opencode/deepseek-v4-flash-free
+          use_github_token: true
+          prompt: |
+            Réponds en français. Fais une review très courte de cette pull request.
+            Ne modifie aucun code. Un seul commentaire global avec 2-3 remarques maximum.
+
+          # ─── PROMPT PRODUCTION (à réactiver quand les tests sont terminés) ───
+          # prompt: |
+          #   Réponds en français. Review this pull request. Do NOT modify any code.
+          #
+          #   PR Number: ${{ github.event.pull_request.number }}
+          #
+          #   IMPORTANT: Pour chaque problème trouvé, utilise OBLIGATOIREMENT la commande suivante pour poster un commentaire inline sur la ligne exacte du fichier :
+          #
+          #   ```bash
+          #   gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments \
+          #     -f body="🔴 **Rubrique** : description" \
+          #     -f commit_id="HEAD" \
+          #     -f path="chemin/du/fichier" \
+          #     -f line=42
+          #   ```
+          #
+          #   Organise les commentaires PAR RUBRIQUE (une commande gh par ligne problématique) :
+          #
+          #   ## 🔴 Bugs
+          #   Signale chaque bug sur sa ligne exacte.
+          #
+          #   ## 🟠 Sécurité
+          #   Signale chaque faille sur sa ligne exacte (hardcoded secrets, injection, validation absente).
+          #
+          #   ## 🟡 Qualité de code / Conventions Dart/Flutter
+          #   Signale sur les lignes exactes (const manquant, naming, patterns dépréciés).
+          #
+          #   ## 🔵 Architecture
+          #   Signale sur les lignes exactes (UI/logique mélangée, service dépendant de BuildContext).
+          #
+          #   ## ✅ Résumé
+          #   Un seul commentaire global de résumé (pas inline) avec les points critiques.
+
+      - name: Collect metrics
+        if: always()
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          WORKFLOW_START_TIME: ${{ env.WORKFLOW_START_TIME }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          export PATH="$HOME/.opencode/bin:$PATH"
+          node scripts/collect-metrics.js

@@ -12,6 +12,10 @@ import '../constants/shared_prefs_keys.dart';
 
 class DirectoryRepositoryImplementation implements DirectoryRepository {
 
+  static const String _foldersKey = 'saved_folders';
+
+  
+
   /// Creates a new folder in the specified base directory or in the default
   /// application documents directory. Returns the created folder path on success.
   @override
