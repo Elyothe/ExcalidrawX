@@ -40,6 +40,14 @@ class ExcalidrawBloc extends Bloc<ExcalidrawEvent, ExcalidrawState> {
       OnOpenFile event, Emitter<ExcalidrawState> emit) async {
     _currentFilePath = event.filePath;
 
+    if (event.elements != null) {
+      emit(state.copyWith(
+        status: ExcalidrawStatus.success,
+        elements: event.elements,
+      ));
+      return;
+    }
+
     emit(state.copyWith(status: ExcalidrawStatus.loading));
 
     final openDrawerUseCase = getIt.get<OpenDrawerUseCase>();

@@ -11,4 +11,6 @@ abstract class DirectoryRepository {
   Future<Either<FolderSelectFailure, String>> selectFolder({Directory? base});
 
   Future<Either<FolderGetExistFailure, List<String>>> getFoldersExists();
+
+  Future<Either<FolderGetExistFailure, List<String>>> listExcalidrawFiles(String path);
 }

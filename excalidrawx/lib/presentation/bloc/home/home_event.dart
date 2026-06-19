@@ -24,3 +24,8 @@ class OnDeleteFolder extends HomeEvent {
   final String path;
   OnDeleteFolder(this.path);
 }
+
+class OnOpenDrawerFile extends HomeEvent {
+  final String filePath;
+  OnOpenDrawerFile(this.filePath);
+}

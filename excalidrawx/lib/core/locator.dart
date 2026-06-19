@@ -6,6 +6,7 @@ import 'package:excalidrawx/domain/usecase/create_directory_usecase.dart';
 import 'package:excalidrawx/domain/usecase/create_drawer_usecase.dart';
 import 'package:excalidrawx/domain/usecase/delete_folder_usecase.dart';
 import 'package:excalidrawx/domain/usecase/get_exists_folder_usecase.dart';
+import 'package:excalidrawx/domain/usecase/get_list_excalidraw_files_usecase.dart';
 import 'package:excalidrawx/domain/usecase/open_drawer_usecase.dart';
 import 'package:excalidrawx/domain/usecase/restore_current_drawer_usecase.dart';
 import 'package:excalidrawx/domain/usecase/save_drawer_usecase.dart';
@@ -47,6 +48,11 @@ class Locator {
     );
     getIt.registerLazySingleton(
             () => DeleteFolderUsecase(
+          directoryRepository: getIt<DirectoryRepository>(),
+        )
+    );
+    getIt.registerLazySingleton(
+            () => GetListExcalidrawFilesUseCase(
           directoryRepository: getIt<DirectoryRepository>(),
         )
     );

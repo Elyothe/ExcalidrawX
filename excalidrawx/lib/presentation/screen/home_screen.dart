@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:excalidrawx/presentation/bloc/home/home_bloc.dart';
+import 'package:excalidrawx/presentation/model/opened_file.dart';
 import 'package:excalidrawx/presentation/screen/excalidraw_screen.dart';
 import 'package:excalidrawx/presentation/widget/macos_layout.dart';
 import 'package:file_picker/file_picker.dart';
@@ -17,7 +18,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final HomeBloc _homeBloc;
-  final ValueNotifier<String?> _filePathNotifier = ValueNotifier(null);
+  final ValueNotifier<OpenedFile?> _openedFileNotifier = ValueNotifier(null);
 
   @override
   void initState() {
@@ -28,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _filePathNotifier.dispose();
+    _openedFileNotifier.dispose();
     _homeBloc.close();
     super.dispose();
   }
@@ -42,18 +43,30 @@ class _HomeScreenState extends State<HomeScreen> {
     if (result == null) return;
     final filePath = result.files.single.path;
     if (filePath == null) return;
-    _filePathNotifier.value = filePath;
+    _openedFileNotifier.value = OpenedFile(filePath);
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _homeBloc,
-      child: Builder(
-        builder: (context) {
-          return Scaffold(
-            body: Row(
-              children: [
+      child: BlocListener<HomeBloc, HomeState>(
+        listenWhen: (previous, current) =>
+            previous.openedFilePath != current.openedFilePath ||
+            previous.openedElements != current.openedElements,
+        listener: (context, state) {
+          if (state.openedFilePath != null) {
+            _openedFileNotifier.value = OpenedFile(
+              state.openedFilePath!,
+              elements: state.openedElements,
+            );
+          }
+        },
+        child: Builder(
+          builder: (context) {
+            return Scaffold(
+              body: Row(
+                children: [
                   SizedBox(
                     width: 220,
                     child: BlocBuilder<HomeBloc, HomeState>(
@@ -80,20 +93,24 @@ class _HomeScreenState extends State<HomeScreen> {
                           onDeleteFolder: (path) {
                             context.read<HomeBloc>().add(OnDeleteFolder(path));
                           },
-                          listFolder: state.savedFolders,
+                          folderFiles: state.folderFiles,
+                          onOpenDrawerFile: (path) {
+                            context.read<HomeBloc>().add(OnOpenDrawerFile(path));
+                          },
                         );
                       },
                     ),
                   ),
-                Expanded(
-                  child: ExcalidrawScreen(
-                    filePathNotifier: _filePathNotifier,
+                  Expanded(
+                    child: ExcalidrawScreen(
+                      fileNotifier: _openedFileNotifier,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          );
-        },
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

@@ -9,10 +9,20 @@ class MacosLayout extends StatefulWidget {
   final VoidCallback onOpenFile;
   final VoidCallback onCreateFolder;
   final VoidCallback onSelectFolder;
-  final List<String> listFolder;
+  final Map<String, List<String>> folderFiles;
   final ValueChanged<String> onDeleteFolder;
+  final ValueChanged<String> onOpenDrawerFile;
 
-  const MacosLayout({super.key, required this.onSave, required this.onOpenFile, required this.onCreateFolder, required this.onSelectFolder, required this.listFolder, required this.onDeleteFolder});
+  const MacosLayout({
+    super.key,
+    required this.onSave,
+    required this.onOpenFile,
+    required this.onCreateFolder,
+    required this.onSelectFolder,
+    required this.folderFiles,
+    required this.onDeleteFolder,
+    required this.onOpenDrawerFile,
+  });
 
   @override
   State<MacosLayout> createState() => _MacosLayout();
@@ -37,15 +47,17 @@ class _MacosLayout extends State<MacosLayout> {
                 selected: pageIndex == 0,
                 onTap: () => setState(() => pageIndex = 0),
               ),
-              _SectionHeader(label: 'Dossiers'),
-              ...widget.listFolder.map(
-                (path) => _SidebarFolderItem(
-                  path: path,
+              _SectionHeader(label: 'Dossiers', onAdd: widget.onSelectFolder),
+              ...widget.folderFiles.entries.map(
+                (entry) => _SidebarFolderItem(
+                  path: entry.key,
+                  files: entry.value,
                   selected: false,
-                  onTap: () {},
-                  onDelete: () => widget.onDeleteFolder(path),
+                  onDelete: () => widget.onDeleteFolder(entry.key),
+                  onOpenFile: widget.onOpenDrawerFile,
                 ),
               ),
+              _SectionHeader(label: 'Library'),
             ],
           );
         },
@@ -54,12 +66,6 @@ class _MacosLayout extends State<MacosLayout> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              PushButton(
-                controlSize: ControlSize.large,
-                child: const Text('Nouveau dessin'),
-                onPressed: () => widget.onSave(),
-              ),
-              const SizedBox(height: 8),
               PushButton(
                 controlSize: ControlSize.large,
                 child: const Text('Ouvrir un fichier'),
@@ -167,8 +173,9 @@ class _SidebarItemWidget extends StatelessWidget {
 
 class _SectionHeader extends StatelessWidget {
   final String label;
+  final VoidCallback? onAdd;
 
-  const _SectionHeader({required this.label});
+  const _SectionHeader({required this.label, this.onAdd});
 
   @override
   Widget build(BuildContext context) {
@@ -176,41 +183,65 @@ class _SectionHeader extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.3)
-              : Colors.black.withValues(alpha: 0.3),
-        ),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.3)
+                  : Colors.black.withValues(alpha: 0.3),
+            ),
+          ),
+          const Spacer(),
+          if (onAdd != null)
+            GestureDetector(
+              onTap: onAdd,
+              child: MacosIcon(
+                CupertinoIcons.plus,
+                size: 14,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.5)
+                    : Colors.black.withValues(alpha: 0.5),
+              ),
+            ),
+        ],
       ),
     );
   }
 }
 
-class _SidebarFolderItem extends StatelessWidget {
+class _SidebarFolderItem extends StatefulWidget {
   final String path;
+  final List<String> files;
   final bool selected;
-  final VoidCallback onTap;
   final VoidCallback onDelete;
+  final ValueChanged<String> onOpenFile;
 
   const _SidebarFolderItem({
     required this.path,
+    required this.files,
     required this.selected,
-    required this.onTap,
     required this.onDelete,
+    required this.onOpenFile,
   });
+
+  @override
+  State<_SidebarFolderItem> createState() => _SidebarFolderItemState();
+}
+
+class _SidebarFolderItemState extends State<_SidebarFolderItem> {
+  bool _expanded = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = MacosTheme.of(context);
     final isDark = theme.brightness.isDark;
-    final name = path.split(Platform.pathSeparator).last;
+    final name = widget.path.split(Platform.pathSeparator).last;
 
     return GestureDetector(
-      onTap: onTap,
       onSecondaryTapUp: (details) {
         showMenu<String>(
           context: context,
@@ -233,43 +264,111 @@ class _SidebarFolderItem extends StatelessWidget {
             ),
           ],
         ).then((value) {
-          if (value == 'delete') onDelete();
+          if (value == 'delete') widget.onDelete();
         });
       },
-      child: Container(
-        width: double.infinity,
-        height: 36,
-        margin: const EdgeInsets.symmetric(vertical: 1),
-        decoration: ShapeDecoration(
-          color: selected
-              ? (isDark
-                  ? MacosColor.fromRGBO(22, 105, 229, 0.749)
-                  : MacosColor.fromRGBO(9, 129, 255, 0.749))
-              : MacosColors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5),
-          ),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-        child: Row(
-          children: [
-            MacosIcon(
-              CupertinoIcons.folder,
-              color: selected ? Colors.white : theme.primaryColor,
-              size: 18,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              name,
-              style: TextStyle(
-                color: selected
-                    ? Colors.white
-                    : (isDark ? Colors.white : Colors.black),
-                overflow: TextOverflow.ellipsis,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap: () => setState(() => _expanded = !_expanded),
+            child: Container(
+              width: double.infinity,
+              height: 36,
+              margin: const EdgeInsets.symmetric(vertical: 1),
+              decoration: ShapeDecoration(
+                color: widget.selected
+                    ? (isDark
+                        ? MacosColor.fromRGBO(22, 105, 229, 0.749)
+                        : MacosColor.fromRGBO(9, 129, 255, 0.749))
+                    : MacosColors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              child: Row(
+                children: [
+                  AnimatedRotation(
+                    turns: _expanded ? 0.25 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: MacosIcon(
+                      CupertinoIcons.chevron_right,
+                      color: widget.selected ? Colors.white : theme.primaryColor,
+                      size: 14,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  MacosIcon(
+                    CupertinoIcons.folder,
+                    color: widget.selected ? Colors.white : theme.primaryColor,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      name,
+                      style: TextStyle(
+                        color: widget.selected
+                            ? Colors.white
+                            : (isDark ? Colors.white : Colors.black),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+          if (_expanded)
+            Padding(
+              padding: const EdgeInsets.only(left: 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: widget.files.map((filePath) {
+                  final fileName = filePath.split(Platform.pathSeparator).last;
+                  return GestureDetector(
+                    onTap: () => widget.onOpenFile(filePath),
+                    child: Container(
+                      width: double.infinity,
+                      height: 30,
+                      margin: const EdgeInsets.symmetric(vertical: 1),
+                      decoration: ShapeDecoration(
+                        color: MacosColors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      child: Row(
+                        children: [
+                          MacosIcon(
+                            CupertinoIcons.doc_text,
+                            color: theme.primaryColor,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              fileName,
+                              style: TextStyle(
+                                color: isDark ? Colors.white : Colors.black,
+                                fontSize: 13,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+        ],
       ),
     );
   }

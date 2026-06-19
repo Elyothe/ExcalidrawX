@@ -2,16 +2,17 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:excalidrawx/presentation/bloc/excalidraw/excalidraw_bloc.dart';
+import 'package:excalidrawx/presentation/model/opened_file.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class ExcalidrawScreen extends StatefulWidget {
-  final ValueNotifier<String?> filePathNotifier;
+  final ValueNotifier<OpenedFile?> fileNotifier;
 
   const ExcalidrawScreen({
     super.key,
-    required this.filePathNotifier,
+    required this.fileNotifier,
   });
 
   @override
@@ -31,7 +32,7 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
   void initState() {
     super.initState();
     _excalidrawBloc = ExcalidrawBloc();
-    widget.filePathNotifier.addListener(_onFilePathReceived);
+    widget.fileNotifier.addListener(_onFileReceived);
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
@@ -67,16 +68,19 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
 
   @override
   void dispose() {
-    widget.filePathNotifier.removeListener(_onFilePathReceived);
+    widget.fileNotifier.removeListener(_onFileReceived);
     _autosaveTimer?.cancel();
     _excalidrawBloc.close();
     super.dispose();
   }
 
-  void _onFilePathReceived() {
-    final filePath = widget.filePathNotifier.value;
-    if (filePath == null) return;
-    _excalidrawBloc.add(OnOpenFile(filePath));
+  void _onFileReceived() {
+    final openedFile = widget.fileNotifier.value;
+    if (openedFile == null) return;
+    _excalidrawBloc.add(OnOpenFile(
+      openedFile.path,
+      elements: openedFile.elements,
+    ));
   }
 
   Future<void> _injectScene(List<dynamic> elements) async {

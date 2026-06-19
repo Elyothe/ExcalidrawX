@@ -6,6 +6,8 @@ import 'package:excalidrawx/domain/entities/error/drawer_error.dart';
 import 'package:excalidrawx/domain/usecase/create_directory_usecase.dart';
 import 'package:excalidrawx/domain/usecase/create_drawer_usecase.dart';
 import 'package:excalidrawx/domain/usecase/get_exists_folder_usecase.dart';
+import 'package:excalidrawx/domain/usecase/get_list_excalidraw_files_usecase.dart';
+import 'package:excalidrawx/domain/usecase/open_drawer_usecase.dart';
 import 'package:excalidrawx/domain/usecase/select_folder_usecase.dart';
 import '../../../core/locator.dart';
 import 'package:dart_mappable/dart_mappable.dart';
@@ -27,6 +29,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<OnSelectFolder>(_onSelectFolder);
     on<OnLoadSavedFolders>(_onLoadSavedFolders);
     on<OnDeleteFolder>(_onDeleteFolder);
+    on<OnOpenDrawerFile>(_onOpenDrawerFile);
   }
 
   Future<void> _onCreateDrawer(OnCreateDrawer event, Emitter<HomeState> emit) async {
@@ -139,14 +142,53 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       Emitter<HomeState> emit,
       ) async {
     final getExistsFolderUsecase = getIt.get<GetExistsFolderUsecase>();
+    final getListExcalidrawFilesUseCase = getIt.get<GetListExcalidrawFilesUseCase>();
 
     final result = await getExistsFolderUsecase();
 
-    result.fold(
-      (error) => logger.e("Failed to load saved folders: ${error.message}"),
-      (folders) {
+    await result.fold(
+      (error) async => logger.e("Failed to load saved folders: ${error.message}"),
+      (folders) async {
         logger.i("Saved folders loaded: $folders");
-        emit(state.copyWith(savedFolders: folders));
+        final folderFiles = <String, List<String>>{};
+
+        for (final folder in folders) {
+          final filesResult = await getListExcalidrawFilesUseCase(folder);
+          filesResult.fold(
+            (error) => logger.e("Failed to list files for $folder: ${error.message}"),
+            (files) => folderFiles[folder] = files,
+          );
+        }
+
+        emit(state.copyWith(
+          savedFolders: folders,
+          folderFiles: folderFiles,
+        ));
+      },
+    );
+  }
+
+  Future<void> _onOpenDrawerFile(
+      OnOpenDrawerFile event,
+      Emitter<HomeState> emit,
+      ) async {
+    final openDrawerUseCase = getIt.get<OpenDrawerUseCase>();
+    final result = await openDrawerUseCase(event.filePath);
+
+    result.fold(
+      (error) {
+        logger.e("Failed to open drawer ${event.filePath}: ${error.message}");
+        emit(state.copyWith(
+          openedFilePath: event.filePath,
+          openedElements: null,
+        ));
+      },
+      (elements) {
+        logger.i("Drawer opened from sidebar: ${event.filePath}");
+        emit(state.copyWith(
+          openedFilePath: event.filePath,
+          openedElements: elements,
+        ));
       },
     );
   }

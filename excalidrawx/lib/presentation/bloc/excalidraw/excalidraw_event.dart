@@ -4,8 +4,9 @@ abstract class ExcalidrawEvent {}
 
 class OnOpenFile extends ExcalidrawEvent {
   final String filePath;
+  final List<dynamic>? elements;
 
-  OnOpenFile(this.filePath);
+  OnOpenFile(this.filePath, {this.elements});
 }
 
 class OnInit extends ExcalidrawEvent {}

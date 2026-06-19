@@ -48,6 +48,21 @@ class HomeStateMapper extends ClassMapperBase<HomeState> {
     opt: true,
     def: const [],
   );
+  static Map<String, List<String>> _$folderFiles(HomeState v) => v.folderFiles;
+  static const Field<HomeState, Map<String, List<String>>> _f$folderFiles =
+      Field('folderFiles', _$folderFiles, opt: true, def: const {});
+  static String? _$openedFilePath(HomeState v) => v.openedFilePath;
+  static const Field<HomeState, String> _f$openedFilePath = Field(
+    'openedFilePath',
+    _$openedFilePath,
+    opt: true,
+  );
+  static List<dynamic>? _$openedElements(HomeState v) => v.openedElements;
+  static const Field<HomeState, List<dynamic>> _f$openedElements = Field(
+    'openedElements',
+    _$openedElements,
+    opt: true,
+  );
 
   @override
   final MappableFields<HomeState> fields = const {
@@ -55,6 +70,9 @@ class HomeStateMapper extends ClassMapperBase<HomeState> {
     #savedPath: _f$savedPath,
     #errorMessage: _f$errorMessage,
     #savedFolders: _f$savedFolders,
+    #folderFiles: _f$folderFiles,
+    #openedFilePath: _f$openedFilePath,
+    #openedElements: _f$openedElements,
   };
 
   static HomeState _instantiate(DecodingData data) {
@@ -63,6 +81,9 @@ class HomeStateMapper extends ClassMapperBase<HomeState> {
       savedPath: data.dec(_f$savedPath),
       errorMessage: data.dec(_f$errorMessage),
       savedFolders: data.dec(_f$savedFolders),
+      folderFiles: data.dec(_f$folderFiles),
+      openedFilePath: data.dec(_f$openedFilePath),
+      openedElements: data.dec(_f$openedElements),
     );
   }
 
@@ -126,11 +147,23 @@ extension HomeStateValueCopy<$R, $Out> on ObjectCopyWith<$R, HomeState, $Out> {
 abstract class HomeStateCopyWith<$R, $In extends HomeState, $Out>
     implements ClassCopyWith<$R, $In, $Out> {
   ListCopyWith<$R, String, ObjectCopyWith<$R, String, String>> get savedFolders;
+  MapCopyWith<
+    $R,
+    String,
+    List<String>,
+    ObjectCopyWith<$R, List<String>, List<String>>
+  >
+  get folderFiles;
+  ListCopyWith<$R, dynamic, ObjectCopyWith<$R, dynamic, dynamic>?>?
+  get openedElements;
   $R call({
     HomeStatus? status,
     String? savedPath,
     String? errorMessage,
     List<String>? savedFolders,
+    Map<String, List<String>>? folderFiles,
+    String? openedFilePath,
+    List<dynamic>? openedElements,
   });
   HomeStateCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
 }
@@ -151,17 +184,44 @@ class _HomeStateCopyWithImpl<$R, $Out>
     (v) => call(savedFolders: v),
   );
   @override
+  MapCopyWith<
+    $R,
+    String,
+    List<String>,
+    ObjectCopyWith<$R, List<String>, List<String>>
+  >
+  get folderFiles => MapCopyWith(
+    $value.folderFiles,
+    (v, t) => ObjectCopyWith(v, $identity, t),
+    (v) => call(folderFiles: v),
+  );
+  @override
+  ListCopyWith<$R, dynamic, ObjectCopyWith<$R, dynamic, dynamic>?>?
+  get openedElements => $value.openedElements != null
+      ? ListCopyWith(
+          $value.openedElements!,
+          (v, t) => ObjectCopyWith(v, $identity, t),
+          (v) => call(openedElements: v),
+        )
+      : null;
+  @override
   $R call({
     HomeStatus? status,
     Object? savedPath = $none,
     Object? errorMessage = $none,
     List<String>? savedFolders,
+    Map<String, List<String>>? folderFiles,
+    Object? openedFilePath = $none,
+    Object? openedElements = $none,
   }) => $apply(
     FieldCopyWithData({
       if (status != null) #status: status,
       if (savedPath != $none) #savedPath: savedPath,
       if (errorMessage != $none) #errorMessage: errorMessage,
       if (savedFolders != null) #savedFolders: savedFolders,
+      if (folderFiles != null) #folderFiles: folderFiles,
+      if (openedFilePath != $none) #openedFilePath: openedFilePath,
+      if (openedElements != $none) #openedElements: openedElements,
     }),
   );
   @override
@@ -170,6 +230,9 @@ class _HomeStateCopyWithImpl<$R, $Out>
     savedPath: data.get(#savedPath, or: $value.savedPath),
     errorMessage: data.get(#errorMessage, or: $value.errorMessage),
     savedFolders: data.get(#savedFolders, or: $value.savedFolders),
+    folderFiles: data.get(#folderFiles, or: $value.folderFiles),
+    openedFilePath: data.get(#openedFilePath, or: $value.openedFilePath),
+    openedElements: data.get(#openedElements, or: $value.openedElements),
   );
 
   @override
