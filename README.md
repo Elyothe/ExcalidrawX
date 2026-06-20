@@ -1,6 +1,6 @@
-# Excalidraw X
+# ExcalidrawX
 
-**Excalidraw X** is a cross-platform desktop client for organizing and editing Excalidraw files. Built with Flutter.
+**ExcalidrawX** is a cross-platform desktop client for organizing and editing Excalidraw files. Built with Flutter.
 
 ---
 
