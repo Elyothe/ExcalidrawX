@@ -6,6 +6,7 @@
 *.swp
 .buildlog/
 .history
+.DS_Store
 
 # Flutter repo-specific
 /bin/cache/
@@ -118,3 +119,6 @@ app.*.symbols
 
 # FVM Version Cache
 .fvm/
+
+.idea/
+*.iml
