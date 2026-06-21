@@ -74,13 +74,33 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
     super.dispose();
   }
 
-  void _onFileReceived() {
+  Future<void> _onFileReceived() async {
     final openedFile = widget.fileNotifier.value;
     if (openedFile == null) return;
+
+    await _saveCurrentBeforeSwitch(openedFile);
+
     _excalidrawBloc.add(OnOpenFile(
       openedFile.path,
       elements: openedFile.elements,
     ));
+  }
+
+  Future<void> _saveCurrentBeforeSwitch(OpenedFile openedFile) async {
+    if (!_isPageLoaded) return;
+    final currentPath = _excalidrawBloc.currentFilePath;
+    if (currentPath == null || currentPath == openedFile.path) return;
+
+    final result = await _getExcalidrawStorage();
+    if (result != null) {
+      _excalidrawBloc.add(OnSaveFile(result));
+    }
+  }
+
+  Future<Object?> _getExcalidrawStorage() {
+    return _controller.runJavaScriptReturningResult(
+      'localStorage.getItem("excalidraw")',
+    );
   }
 
   Future<void> _injectScene(List<dynamic> elements) async {
@@ -109,9 +129,7 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
   Future<void> _autosaveTick() async {
     if (!_isPageLoaded) return;
 
-    final result = await _controller.runJavaScriptReturningResult(
-      'localStorage.getItem("excalidraw")',
-    );
+    final result = await _getExcalidrawStorage();
     if (result != null) {
       _excalidrawBloc.add(OnSaveFile(result));
     }
