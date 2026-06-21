@@ -171,6 +171,15 @@ class DrawerRepositoryImplementation implements DrawerRepository {
   Future<Either<DrawerOpenFailure, String>> _readFileContent(
     String filePath,
   ) async {
+    final Directory? parentDir = await _findParentFolderBookmark(filePath);
+    if (parentDir != null) {
+      try {
+        await _secureBookmarks.startAccessingSecurityScopedResource(parentDir);
+      } catch (e) {
+        logger.w("Failed to start parent folder access, falling back: $e");
+      }
+    }
+
     try {
       final prefs = await SharedPreferences.getInstance();
       final existingBookmark = prefs.getString(SharedPrefsKeys.currentDrawerBookmark);
@@ -196,7 +205,47 @@ class DrawerRepositoryImplementation implements DrawerRepository {
         'Erreur lors de la lecture du fichier',
         underlying: e,
       ));
+    } finally {
+      if (parentDir != null) {
+        try {
+          await _secureBookmarks.stopAccessingSecurityScopedResource(parentDir);
+        } catch (_) {
+          // Best-effort cleanup
+        }
+      }
     }
+  }
+
+  /// Looks up a saved folder bookmark whose path is a parent of [filePath],
+  /// resolves it, and returns the [Directory]. Returns `null` when no
+  /// matching folder bookmark exists or resolution fails.
+  Future<Directory?> _findParentFolderBookmark(String filePath) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(SharedPrefsKeys.savedFolderBookmarks);
+    if (raw == null || raw.isEmpty) return null;
+
+    try {
+      final bookmarks = jsonDecode(raw) as Map<String, dynamic>;
+      for (final entry in bookmarks.entries) {
+        final folderPath = entry.key;
+        final bookmark = entry.value.toString();
+        if (filePath == folderPath ||
+            filePath.startsWith('$folderPath/')) {
+          try {
+            final resolved = await _secureBookmarks.resolveBookmark(
+              bookmark,
+              isDirectory: true,
+            ) as Directory;
+            return resolved;
+          } catch (e) {
+            logger.w("Parent folder bookmark stale for $folderPath: $e");
+          }
+        }
+      }
+    } catch (e) {
+      logger.w("Failed to decode folder bookmarks for parent lookup: $e");
+    }
+    return null;
   }
 
   /// Resolves [bookmark] if it matches [file]; otherwise creates and resolves
