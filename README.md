@@ -1,10 +1,11 @@
 <h1 align="center">ExcalidrawX</h1>
 
 <p align="center">
-  <img src="./excalidrawx/assets/logo_rounded.png" alt="ExcalidrawX" width="128" style="border-radius: 16px">
+  <img src="./excalidrawx/assets/logo_rounded.png" alt="ExcalidrawX" width="128">
 </p>
 
 <p align="center"><strong>ExcalidrawX</strong> is a cross-platform desktop client for organizing and editing Excalidraw files. Built with Flutter.</p>
+
 <p align="center">
   <a href="https://github.com/Elyothe/ExcalidrawX/releases/latest">
     <img alt="Latest Release" src="https://img.shields.io/github/v/release/Elyothe/ExcalidrawX?include_prereleases&sort=semver&style=for-the-badge&labelColor=24273a&color=c6a0f6">
