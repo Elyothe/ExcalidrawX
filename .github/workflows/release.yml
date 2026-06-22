@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+
+    defaults:
+      run:
+        working-directory: excalidrawx
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run code generation
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build macOS app
+        run: flutter build macos --release
+
+      - name: Create DMG
+        run: |
+          APP_PATH="build/macos/Build/Products/Release/ExcalidrawX.app"
+          VERSION="${GITHUB_REF_NAME#v}"
+          DMG_NAME="ExcalidrawX-${VERSION}.dmg"
+
+          mkdir -p dmg
+          cp -R "${APP_PATH}" dmg/
+          ln -s /Applications dmg/Applications
+
+          hdiutil create -volname "ExcalidrawX" -srcfolder dmg -ov -format UDZO "${DMG_NAME}"
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: excalidrawx/ExcalidrawX-*.dmg
