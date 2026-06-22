@@ -1,4 +1,4 @@
-# ExcalidrawX
+<h1 align="center">ExcalidrawX</h1>
 
 **ExcalidrawX** is a cross-platform desktop client for organizing and editing Excalidraw files. Built with Flutter.
 
