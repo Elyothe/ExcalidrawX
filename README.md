@@ -2,6 +2,18 @@
 
 **ExcalidrawX** is a cross-platform desktop client for organizing and editing Excalidraw files. Built with Flutter.
 
+<p align="center">
+  <a href="https://github.com/Elyothe/ExcalidrawX/releases/latest">
+    <img alt="Latest Release" src="https://img.shields.io/github/v/release/Elyothe/ExcalidrawX?include_prereleases&sort=semver&style=for-the-badge&labelColor=24273a&color=c6a0f6">
+  </a>
+  <a href="https://github.com/Elyothe/ExcalidrawX/releases/latest">
+    <img alt="macOS" src="https://img.shields.io/badge/macOS-dmg-grey?style=for-the-badge&labelColor=24273a&color=8bd5ca&logo=apple&logoColor=white">
+  </a>
+  <a href="https://github.com/Elyothe/ExcalidrawX/blob/main/LICENSE">
+    <img alt="License" src="https://img.shields.io/badge/license-MIT-grey?style=for-the-badge&labelColor=24273a&color=a6da95">
+  </a>
+</p>
+
 ---
 
 ## Platform Support
