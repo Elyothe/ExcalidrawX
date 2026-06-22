@@ -57,7 +57,6 @@ class _MacosLayout extends State<MacosLayout> {
                   onOpenFile: widget.onOpenDrawerFile,
                 ),
               ),
-              _SectionHeader(label: 'Library'),
             ],
           );
         },
@@ -76,12 +75,6 @@ class _MacosLayout extends State<MacosLayout> {
                 controlSize: ControlSize.large,
                 child: const Text('Ouvrir un dossier'),
                 onPressed: () => widget.onSelectFolder(),
-              ),
-              const SizedBox(height: 8),
-              PushButton(
-                controlSize: ControlSize.large,
-                child: const Text('Nouveau dossier'),
-                onPressed: () => widget.onCreateFolder(),
               ),
             ],
           ),
