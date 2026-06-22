@@ -4,7 +4,7 @@
   <img src="./excalidrawx/assets/logo.png" alt="ExcalidrawX" width="128" style="border-radius: 16px">
 </p>
 
-**ExcalidrawX** is a cross-platform desktop client for organizing and editing Excalidraw files. Built with Flutter.
+<p align="center"><strong>ExcalidrawX</strong> is a cross-platform desktop client for organizing and editing Excalidraw files. Built with Flutter.</p>
 
 <p align="center">
   <a href="https://github.com/Elyothe/ExcalidrawX/releases/latest">
