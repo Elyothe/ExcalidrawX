@@ -9,6 +9,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../widget/layout.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -71,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: 220,
                     child: BlocBuilder<HomeBloc, HomeState>(
                       builder: (context, state) {
-                        return MacosLayout(
+                        return Layout(
                           onSave: () {
                             final data = Uint8List(0);
                             final name = 'excalidraw-${DateTime.now().millisecondsSinceEpoch}';
