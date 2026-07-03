@@ -11,6 +11,7 @@ class HomeState with HomeStateMappable {
   final Map<String, List<String>> folderFiles;
   final String? openedFilePath;
   final List<dynamic>? openedElements;
+  final String? libraryUrl;
 
   const HomeState({
     this.status = HomeStatus.initial,
@@ -20,5 +21,6 @@ class HomeState with HomeStateMappable {
     this.folderFiles = const {},
     this.openedFilePath,
     this.openedElements,
+    this.libraryUrl,
   });
 }

@@ -9,8 +9,6 @@ abstract class DrawerRepository {
     required String name,
   });
 
-  //Future<Either<DrawerOpenFailure, String>> openDrawer(String data);
-
   Future<Either<DrawerOpenFailure, List<dynamic>>> readDrawer(String filePath);
 
   Future<Either<DrawerOpenFailure, String>> readDrawerRaw(String filePath);

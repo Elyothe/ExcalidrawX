@@ -1,7 +1,9 @@
 import 'package:excalidrawx/data/repository/directory_repository_implementation.dart';
 import 'package:excalidrawx/data/repository/drawer_repository_implementation.dart';
+import 'package:excalidrawx/data/repository/library_repository_implementation.dart';
 import 'package:excalidrawx/domain/repository/directory_repository.dart';
 import 'package:excalidrawx/domain/repository/drawer_repository.dart';
+import 'package:excalidrawx/domain/repository/library_repository.dart';
 import 'package:excalidrawx/domain/usecase/create_directory_usecase.dart';
 import 'package:excalidrawx/domain/usecase/create_drawer_usecase.dart';
 import 'package:excalidrawx/domain/usecase/delete_folder_usecase.dart';
@@ -23,6 +25,9 @@ class Locator {
     );
     getIt.registerLazySingleton<DirectoryRepository>(
           () => DirectoryRepositoryImplementation(),
+    );
+    getIt.registerLazySingleton<LibraryRepository>(
+          () => LibraryRepositoryImplementation(),
     );
 
     //Usecases

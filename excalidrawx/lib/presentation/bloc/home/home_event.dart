@@ -29,3 +29,10 @@ class OnOpenDrawerFile extends HomeEvent {
   final String filePath;
   OnOpenDrawerFile(this.filePath);
 }
+
+class OnImportLibrary extends HomeEvent {
+  final String url;
+  OnImportLibrary(this.url);
+}
+
+class OnRestoreLibrary extends HomeEvent {}

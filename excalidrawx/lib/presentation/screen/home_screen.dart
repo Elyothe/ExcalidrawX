@@ -6,8 +6,10 @@ import 'package:excalidrawx/presentation/model/opened_file.dart';
 import 'package:excalidrawx/presentation/screen/excalidraw_screen.dart';
 import 'package:excalidrawx/presentation/widget/macos_layout.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:macos_ui/macos_ui.dart';
 
 import '../widget/layout.dart';
 
@@ -21,17 +23,20 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late final HomeBloc _homeBloc;
   final ValueNotifier<OpenedFile?> _openedFileNotifier = ValueNotifier(null);
+  final ValueNotifier<String?> _libraryNotifier = ValueNotifier(null);
 
   @override
   void initState() {
     super.initState();
     _homeBloc = HomeBloc();
     _homeBloc.add(OnLoadSavedFolders());
+    _homeBloc.add(OnRestoreLibrary());
   }
 
   @override
   void dispose() {
     _openedFileNotifier.dispose();
+    _libraryNotifier.dispose();
     _homeBloc.close();
     super.dispose();
   }
@@ -48,6 +53,43 @@ class _HomeScreenState extends State<HomeScreen> {
     _openedFileNotifier.value = OpenedFile(filePath);
   }
 
+  Future<void> _onImportLibrary() async {
+    final urlController = TextEditingController();
+    final url = await showDialog<String>(
+      context: context,
+      builder: (context) => MacosAlertDialog(
+        appIcon: const Icon(CupertinoIcons.book, size: 48),
+        title: const Text('Importer une library via URL'),
+        message: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("Collez l'URL de la library Excalidraw :"),
+            const SizedBox(height: 12),
+            MacosTextField(
+              placeholder: 'https://...',
+              controller: urlController,
+            ),
+          ],
+        ),
+        primaryButton: PushButton(
+          controlSize: ControlSize.large,
+          child: const Text('Importer'),
+          onPressed: () => Navigator.of(context).pop(urlController.text),
+        ),
+        secondaryButton: PushButton(
+          controlSize: ControlSize.large,
+          child: const Text('Annuler'),
+          onPressed: () => Navigator.of(context).pop(null),
+        ),
+      ),
+    );
+
+    if (url != null && url.trim().isNotEmpty) {
+      _homeBloc.add(OnImportLibrary(url.trim()));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
@@ -55,13 +97,17 @@ class _HomeScreenState extends State<HomeScreen> {
       child: BlocListener<HomeBloc, HomeState>(
         listenWhen: (previous, current) =>
             previous.openedFilePath != current.openedFilePath ||
-            previous.openedElements != current.openedElements,
+            previous.openedElements != current.openedElements ||
+            previous.libraryUrl != current.libraryUrl,
         listener: (context, state) {
           if (state.openedFilePath != null) {
             _openedFileNotifier.value = OpenedFile(
               state.openedFilePath!,
               elements: state.openedElements,
             );
+          }
+          if (state.libraryUrl != null) {
+            _libraryNotifier.value = state.libraryUrl;
           }
         },
         child: Builder(
@@ -92,6 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           onSelectFolder: () {
                             context.read<HomeBloc>().add(OnSelectFolder());
                           },
+                          onImportLibrary: _onImportLibrary,
                           onDeleteFolder: (path) {
                             context.read<HomeBloc>().add(OnDeleteFolder(path));
                           },
@@ -106,6 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: ExcalidrawScreen(
                       fileNotifier: _openedFileNotifier,
+                      libraryNotifier: _libraryNotifier,
                     ),
                   ),
                 ],

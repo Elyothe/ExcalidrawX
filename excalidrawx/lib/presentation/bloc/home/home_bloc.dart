@@ -3,6 +3,8 @@ import 'dart:typed_data';
 
 import 'package:bloc/bloc.dart';
 import 'package:excalidrawx/domain/entities/error/drawer_error.dart';
+import 'package:excalidrawx/domain/entities/error/library_error.dart';
+import 'package:excalidrawx/domain/repository/library_repository.dart';
 import 'package:excalidrawx/domain/usecase/create_directory_usecase.dart';
 import 'package:excalidrawx/domain/usecase/create_drawer_usecase.dart';
 import 'package:excalidrawx/domain/usecase/get_exists_folder_usecase.dart';
@@ -30,6 +32,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<OnLoadSavedFolders>(_onLoadSavedFolders);
     on<OnDeleteFolder>(_onDeleteFolder);
     on<OnOpenDrawerFile>(_onOpenDrawerFile);
+    on<OnImportLibrary>(_onImportLibrary);
+    on<OnRestoreLibrary>(_onRestoreLibrary);
   }
 
   Future<void> _onCreateDrawer(OnCreateDrawer event, Emitter<HomeState> emit) async {
@@ -191,5 +195,109 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         ));
       },
     );
+  }
+
+  Future<void> _onImportLibrary(
+      OnImportLibrary event,
+      Emitter<HomeState> emit,
+  ) async {
+    final url = event.url.trim();
+    if (url.isEmpty) {
+      emit(state.copyWith(
+        status: HomeStatus.failure,
+        errorMessage: "L'URL de la library ne peut pas être vide",
+      ));
+      return;
+    }
+
+    final uri = Uri.tryParse(url);
+    if (uri == null || !uri.hasScheme || !['http', 'https'].contains(uri.scheme)) {
+      emit(state.copyWith(
+        status: HomeStatus.failure,
+        errorMessage: "URL invalide. L'URL doit commencer par http:// ou https://",
+      ));
+      return;
+    }
+
+    // Extract library URL from #addLibrary hash if present
+    var finalUrl = url;
+    if (url.contains('#addLibrary=')) {
+      final hashPart = url.split('#addLibrary=').last;
+      final params = hashPart.split('&');
+      var libUrl = Uri.decodeComponent(params.first);
+
+      // Look for token parameter
+      String? token;
+      for (final param in params.skip(1)) {
+        if (param.startsWith('token=')) {
+          token = Uri.decodeComponent(param.substring(6));
+          break;
+        }
+      }
+
+      // Append token to library URL if found
+      if (token != null && !libUrl.contains('token=')) {
+        final separator = libUrl.contains('?') ? '&' : '?';
+        libUrl = '$libUrl${separator}token=$token';
+      }
+
+      finalUrl = libUrl;
+      logger.i('Extracted library URL from hash: $finalUrl');
+    }
+
+    emit(state.copyWith(status: HomeStatus.loading));
+
+    try {
+      final repo = getIt.get<LibraryRepository>();
+      final saveResult = await repo.saveLibraryUrl(finalUrl);
+
+      saveResult.fold(
+        (error) => emit(state.copyWith(
+          status: HomeStatus.failure,
+          errorMessage: switch (error) {
+            LibraryFolderAccessFailure(:final message) => message,
+            _ => "Erreur inconnue",
+          },
+        )),
+        (savedUrl) {
+          logger.i("Library URL saved: $savedUrl");
+          emit(state.copyWith(
+            status: HomeStatus.success,
+            libraryUrl: finalUrl,
+          ));
+        },
+      );
+    } catch (e) {
+      logger.e("Library URL save error: $e");
+      emit(state.copyWith(
+        status: HomeStatus.failure,
+        errorMessage: "Erreur lors de l'enregistrement de l'URL",
+      ));
+    }
+  }
+
+  Future<void> _onRestoreLibrary(
+      OnRestoreLibrary event,
+      Emitter<HomeState> emit,
+  ) async {
+    try {
+      final repo = getIt.get<LibraryRepository>();
+      final result = await repo.getLibraryUrl();
+
+      result.fold(
+        (error) => logger.e("Failed to restore library URL: ${switch (error) {
+          LibraryFolderAccessFailure(:final message) => message,
+          _ => "Unknown error",
+        }}"),
+        (url) {
+          if (url != null && url.isNotEmpty) {
+            logger.i("Library URL restored: $url");
+            emit(state.copyWith(libraryUrl: url));
+          }
+        },
+      );
+    } catch (e) {
+      logger.e("Restore library URL error: $e");
+    }
   }
 }

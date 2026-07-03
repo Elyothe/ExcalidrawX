@@ -9,10 +9,12 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class ExcalidrawScreen extends StatefulWidget {
   final ValueNotifier<OpenedFile?> fileNotifier;
+  final ValueNotifier<String?> libraryNotifier;
 
   const ExcalidrawScreen({
     super.key,
     required this.fileNotifier,
+    required this.libraryNotifier,
   });
 
   @override
@@ -26,13 +28,15 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
   String? _errorMessage;
   Timer? _autosaveTimer;
   bool _isPageLoaded = false;
-  List<dynamic>? _pendingElements;
+  List<dynamic>? _pendingSceneElements;
+  String? _pendingLibraryUrl;
 
   @override
   void initState() {
     super.initState();
     _excalidrawBloc = ExcalidrawBloc();
     widget.fileNotifier.addListener(_onFileReceived);
+    widget.libraryNotifier.addListener(_onLibraryReceived);
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
@@ -45,14 +49,26 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
             _isPageLoaded = false;
             _autosaveTimer?.cancel();
           },
-          onPageFinished: (String url) {
+          onPageFinished: (String url) async {
             setState(() {
               _isLoading = false;
             });
             _isPageLoaded = true;
-            if (_pendingElements != null) {
-              _injectScene(_pendingElements!);
+
+            // Handle pending scene
+            if (_pendingSceneElements != null) {
+              _injectScene(_pendingSceneElements!);
             }
+
+            // Handle pending library URL
+            if (_pendingLibraryUrl != null) {
+              final libUrl = _pendingLibraryUrl!;
+              _pendingLibraryUrl = null;
+              await _controller.runJavaScript('''
+                window.location.hash = "#addLibrary=" + ${jsonEncode(libUrl)};
+              ''');
+            }
+
             _startAutosaveTimer();
           },
           onWebResourceError: (WebResourceError error) {
@@ -69,6 +85,7 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
   @override
   void dispose() {
     widget.fileNotifier.removeListener(_onFileReceived);
+    widget.libraryNotifier.removeListener(_onLibraryReceived);
     _autosaveTimer?.cancel();
     _excalidrawBloc.close();
     super.dispose();
@@ -86,29 +103,48 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
     ));
   }
 
+  Future<void> _onLibraryReceived() async {
+    final url = widget.libraryNotifier.value;
+    if (url == null || url.isEmpty) return;
+    await _importLibraryFromUrl(url);
+    widget.libraryNotifier.value = null;
+  }
+
   Future<void> _saveCurrentBeforeSwitch(OpenedFile openedFile) async {
     if (!_isPageLoaded) return;
     final currentPath = _excalidrawBloc.currentFilePath;
     if (currentPath == null || currentPath == openedFile.path) return;
 
-    final result = await _getExcalidrawStorage();
+    final result = await _getDrawerStorage();
     if (result != null) {
       _excalidrawBloc.add(OnSaveFile(result));
     }
   }
 
-  Future<Object?> _getExcalidrawStorage() {
+  Future<Object?> _getDrawerStorage() {
     return _controller.runJavaScriptReturningResult(
       'localStorage.getItem("excalidraw")',
     );
   }
 
-  Future<void> _injectScene(List<dynamic> elements) async {
+
+Future<void> _importLibraryFromUrl(String url) async {
+  if (!_isPageLoaded) {
+    _pendingLibraryUrl = url;
+    return;
+  }
+  _pendingLibraryUrl = null;
+  await _controller.runJavaScript('''
+      window.location.hash = "#addLibrary=" + ${jsonEncode(url)};
+    ''');
+}
+
+Future<void> _injectScene(List<dynamic> elements) async {
     if (!_isPageLoaded) {
-      _pendingElements = elements;
+      _pendingSceneElements = elements;
       return;
     }
-    _pendingElements = null;
+    _pendingSceneElements = null;
     await _controller.runJavaScript('''
       localStorage.setItem(
         "excalidraw",
@@ -129,7 +165,7 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
   Future<void> _autosaveTick() async {
     if (!_isPageLoaded) return;
 
-    final result = await _getExcalidrawStorage();
+    final result = await _getDrawerStorage();
     if (result != null) {
       _excalidrawBloc.add(OnSaveFile(result));
     }

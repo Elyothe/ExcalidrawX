@@ -63,6 +63,12 @@ class HomeStateMapper extends ClassMapperBase<HomeState> {
     _$openedElements,
     opt: true,
   );
+  static String? _$libraryUrl(HomeState v) => v.libraryUrl;
+  static const Field<HomeState, String> _f$libraryUrl = Field(
+    'libraryUrl',
+    _$libraryUrl,
+    opt: true,
+  );
 
   @override
   final MappableFields<HomeState> fields = const {
@@ -73,6 +79,7 @@ class HomeStateMapper extends ClassMapperBase<HomeState> {
     #folderFiles: _f$folderFiles,
     #openedFilePath: _f$openedFilePath,
     #openedElements: _f$openedElements,
+    #libraryUrl: _f$libraryUrl,
   };
 
   static HomeState _instantiate(DecodingData data) {
@@ -84,6 +91,7 @@ class HomeStateMapper extends ClassMapperBase<HomeState> {
       folderFiles: data.dec(_f$folderFiles),
       openedFilePath: data.dec(_f$openedFilePath),
       openedElements: data.dec(_f$openedElements),
+      libraryUrl: data.dec(_f$libraryUrl),
     );
   }
 
@@ -164,6 +172,7 @@ abstract class HomeStateCopyWith<$R, $In extends HomeState, $Out>
     Map<String, List<String>>? folderFiles,
     String? openedFilePath,
     List<dynamic>? openedElements,
+    String? libraryUrl,
   });
   HomeStateCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
 }
@@ -213,6 +222,7 @@ class _HomeStateCopyWithImpl<$R, $Out>
     Map<String, List<String>>? folderFiles,
     Object? openedFilePath = $none,
     Object? openedElements = $none,
+    Object? libraryUrl = $none,
   }) => $apply(
     FieldCopyWithData({
       if (status != null) #status: status,
@@ -222,6 +232,7 @@ class _HomeStateCopyWithImpl<$R, $Out>
       if (folderFiles != null) #folderFiles: folderFiles,
       if (openedFilePath != $none) #openedFilePath: openedFilePath,
       if (openedElements != $none) #openedElements: openedElements,
+      if (libraryUrl != $none) #libraryUrl: libraryUrl,
     }),
   );
   @override
@@ -233,6 +244,7 @@ class _HomeStateCopyWithImpl<$R, $Out>
     folderFiles: data.get(#folderFiles, or: $value.folderFiles),
     openedFilePath: data.get(#openedFilePath, or: $value.openedFilePath),
     openedElements: data.get(#openedElements, or: $value.openedElements),
+    libraryUrl: data.get(#libraryUrl, or: $value.libraryUrl),
   );
 
   @override
