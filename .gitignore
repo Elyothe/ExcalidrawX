@@ -7,6 +7,11 @@
 .buildlog/
 .history
 .DS_Store
+.atom/
+.build/
+.svn/
+.swiftpm/
+migrate_working_dir/
 
 # Flutter repo-specific
 /bin/cache/
@@ -55,6 +60,9 @@ unlinked_spec.ds
 **/android/**/GeneratedPluginRegistrant.java
 **/android/key.properties
 *.jks
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
 
 # iOS/XCode related
 **/ios/**/*.mode1v3
@@ -105,6 +113,9 @@ unlinked_spec.ds
 
 # Coverage
 coverage/
+
+# Obfuscation related
+app.*.map.json
 
 # Symbols
 app.*.symbols
