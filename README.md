@@ -1,7 +1,7 @@
 <h1 align="center">ExcalidrawX</h1>
 
 <p align="center">
-  <img src="./excalidrawx/assets/logo_rounded.png" alt="ExcalidrawX" width="128">
+  <img src="./assets/logo_rounded.png" alt="ExcalidrawX" width="128">
 </p>
 
 <p align="center"><strong>ExcalidrawX</strong> is a cross-platform desktop client for organizing and editing Excalidraw files. Built with Flutter.</p>
@@ -63,7 +63,6 @@ fvm install
 fvm use
 
 # Install dependencies
-cd excalidrawx
 fvm flutter pub get
 
 # Generate code (dart_mappable serialization, etc.)
