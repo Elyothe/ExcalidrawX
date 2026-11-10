@@ -7,7 +7,7 @@ import 'dart:io' show Platform;
 
 import 'core/locator.dart';
 import 'core/logger/logger_setup.dart';
-
+import 'core/theme/app_theme.dart';
 
 GetIt getIt = GetIt.instance;
 void setupLocator() {
@@ -38,9 +38,9 @@ class MyApp extends StatelessWidget {
     return MacosApp(
       debugShowCheckedModeBanner: false,
       title: 'ExcalidrawX',
-      theme: MacosThemeData.light(),
-      darkTheme: MacosThemeData.dark(),
-      themeMode: ThemeMode.system,
+      theme: AppTheme.macosDark,
+      darkTheme: AppTheme.macosDark,
+      themeMode: ThemeMode.dark,
       home: const HomeScreen(),
     );
   }
