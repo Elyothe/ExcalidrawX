@@ -3,7 +3,11 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_theme.dart';
+import 'global_app_bar.dart';
+
 class Layout extends StatefulWidget {
+  final Widget child;
   final VoidCallback onSave;
   final VoidCallback onOpenFile;
   final VoidCallback onCreateFolder;
@@ -14,6 +18,7 @@ class Layout extends StatefulWidget {
 
   const Layout({
     super.key,
+    required this.child,
     required this.onSave,
     required this.onOpenFile,
     required this.onCreateFolder,
@@ -29,91 +34,85 @@ class Layout extends StatefulWidget {
 
 class _LayoutState extends State<Layout> {
   int pageIndex = 0;
+  bool _isSidebarOpen = true;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.black,
-      child: Row(
-        children: [
-          Container(
-            width: 220,
-            color: const Color(0xFF1A1A1A),
-            child: Column(
-              children: [
-                if (Platform.isMacOS)
-                  Container(
-                    width: double.infinity,
-                    height: 52,
-                    color: Colors.transparent,
-                  ),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.all(10),
-                    children: [
-                      _SidebarItemWidget(
-                        icon: CupertinoIcons.home,
-                        label: 'Accueil',
-                        selected: pageIndex == 0,
-                        onTap: () => setState(() => pageIndex = 0),
-                      ),
-                      _SectionHeader(
-                        label: 'Dossiers',
-                        onAdd: widget.onSelectFolder,
-                      ),
-                      ...widget.folderFiles.entries.map(
-                        (entry) => _SidebarFolderItem(
-                          path: entry.key,
-                          files: entry.value,
-                          selected: false,
-                          onDelete: () => widget.onDeleteFolder(entry.key),
-                          onOpenFile: widget.onOpenDrawerFile,
+      color: AppTheme.background,
+      child: Scaffold(
+        appBar: GlobalAppBar(
+          isSidebarOpen: _isSidebarOpen,
+          onToggleSidebar: () =>
+              setState(() => _isSidebarOpen = !_isSidebarOpen),
+        ),
+        body: Row(
+          children: [
+            Container(
+              width: _isSidebarOpen ? 220 : 0,
+              color: AppTheme.surface,
+              child: _isSidebarOpen
+                  ? Column(
+                      children: [
+                        Expanded(
+                          child: ListView(
+                            padding: const EdgeInsets.all(10),
+                            children: [
+                              _SidebarItemWidget(
+                                icon: CupertinoIcons.home,
+                                label: 'Accueil',
+                                selected: pageIndex == 0,
+                                onTap: () => setState(() => pageIndex = 0),
+                              ),
+                              _SectionHeader(
+                                label: 'Dossiers',
+                                onAdd: widget.onSelectFolder,
+                              ),
+                              ...widget.folderFiles.entries.map(
+                                (entry) => _SidebarFolderItem(
+                                  path: entry.key,
+                                  files: entry.value,
+                                  selected: false,
+                                  onDelete: () =>
+                                      widget.onDeleteFolder(entry.key),
+                                  onOpenFile: widget.onOpenDrawerFile,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        width: double.infinity,
-                        child: _DarkButton(
-                          label: 'Ouvrir un fichier',
-                          onPressed: widget.onOpenFile,
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                width: double.infinity,
+                                child: _DarkButton(
+                                  label: 'Ouvrir un fichier',
+                                  onPressed: widget.onOpenFile,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              SizedBox(
+                                width: double.infinity,
+                                child: _DarkButton(
+                                  label: 'Ouvrir un dossier',
+                                  onPressed: widget.onSelectFolder,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        width: double.infinity,
-                        child: _DarkButton(
-                          label: 'Ouvrir un dossier',
-                          onPressed: widget.onSelectFolder,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                      ],
+                    )
+                  : null,
             ),
-          ),
-          Expanded(
-            child: _buildPage(pageIndex),
-          ),
-        ],
+            Expanded(child: widget.child),
+          ],
+        ),
       ),
     );
-  }
-
-  Widget _buildPage(int index) {
-    switch (index) {
-      case 0:
-        return const Center();
-      default:
-        return const SizedBox.shrink();
-    }
   }
 }
 
@@ -127,12 +126,10 @@ class _DarkButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF333333),
-        foregroundColor: Colors.white,
+        backgroundColor: AppTheme.button,
+        foregroundColor: AppTheme.text,
         padding: const EdgeInsets.symmetric(vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(6),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         elevation: 0,
       ),
       onPressed: onPressed,
@@ -163,26 +160,22 @@ class _SidebarItemWidget extends StatelessWidget {
         height: 36,
         margin: const EdgeInsets.symmetric(vertical: 1),
         decoration: ShapeDecoration(
-          color: selected
-              ? const Color.fromRGBO(22, 105, 229, 0.749)
-              : Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5),
-          ),
+          color: selected ? AppTheme.selected : Colors.transparent,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         child: Row(
           children: [
             Icon(
               icon,
-              color: selected ? Colors.white : const Color(0xFF4A9EFF),
+              color: selected ? AppTheme.text : AppTheme.accent,
               size: 18,
             ),
             const SizedBox(width: 10),
             Text(
               label,
               style: TextStyle(
-                color: selected ? Colors.white : const Color(0xFFCCCCCC),
+                color: selected ? AppTheme.text : AppTheme.secondaryText,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -210,7 +203,7 @@ class _SectionHeader extends StatelessWidget {
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,
-              color: Color(0xFF555555),
+              color: AppTheme.disabledText,
             ),
           ),
           const Spacer(),
@@ -220,7 +213,7 @@ class _SectionHeader extends StatelessWidget {
               child: const Icon(
                 CupertinoIcons.plus,
                 size: 14,
-                color: Color(0xFF666666),
+                color: AppTheme.secondaryText,
               ),
             ),
         ],
@@ -259,7 +252,7 @@ class _SidebarFolderItemState extends State<_SidebarFolderItem> {
       onSecondaryTapUp: (details) {
         showMenu<String>(
           context: context,
-          color: const Color(0xFF2A2A2A),
+          color: AppTheme.elevatedSurface,
           position: RelativeRect.fromLTRB(
             details.globalPosition.dx,
             details.globalPosition.dy,
@@ -292,9 +285,7 @@ class _SidebarFolderItemState extends State<_SidebarFolderItem> {
               height: 36,
               margin: const EdgeInsets.symmetric(vertical: 1),
               decoration: ShapeDecoration(
-                color: widget.selected
-                    ? const Color.fromRGBO(22, 105, 229, 0.749)
-                    : Colors.transparent,
+                color: widget.selected ? AppTheme.selected : Colors.transparent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),
                 ),
@@ -307,18 +298,14 @@ class _SidebarFolderItemState extends State<_SidebarFolderItem> {
                     duration: const Duration(milliseconds: 200),
                     child: Icon(
                       CupertinoIcons.chevron_right,
-                      color: widget.selected
-                          ? Colors.white
-                          : const Color(0xFF4A9EFF),
+                      color: widget.selected ? Colors.white : AppTheme.accent,
                       size: 14,
                     ),
                   ),
                   const SizedBox(width: 6),
                   Icon(
                     CupertinoIcons.folder,
-                    color: widget.selected
-                        ? Colors.white
-                        : const Color(0xFF4A9EFF),
+                    color: widget.selected ? Colors.white : AppTheme.accent,
                     size: 18,
                   ),
                   const SizedBox(width: 8),
@@ -328,7 +315,7 @@ class _SidebarFolderItemState extends State<_SidebarFolderItem> {
                       style: TextStyle(
                         color: widget.selected
                             ? Colors.white
-                            : const Color(0xFFCCCCCC),
+                            : AppTheme.secondaryText,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -364,7 +351,7 @@ class _SidebarFolderItemState extends State<_SidebarFolderItem> {
                         children: [
                           const Icon(
                             CupertinoIcons.doc_text,
-                            color: Color(0xFF4A9EFF),
+                            color: AppTheme.accent,
                             size: 16,
                           ),
                           const SizedBox(width: 8),
@@ -372,7 +359,7 @@ class _SidebarFolderItemState extends State<_SidebarFolderItem> {
                             child: Text(
                               fileName,
                               style: const TextStyle(
-                                color: Color(0xFFCCCCCC),
+                                color: AppTheme.secondaryText,
                                 fontSize: 13,
                                 overflow: TextOverflow.ellipsis,
                               ),
