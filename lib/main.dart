@@ -8,6 +8,7 @@ import 'dart:io' show Platform;
 import 'core/locator.dart';
 import 'core/logger/logger_setup.dart';
 import 'core/theme/app_theme.dart';
+import 'core/web_server/local_excalidraw_server.dart';
 
 GetIt getIt = GetIt.instance;
 void setupLocator() {
@@ -26,12 +27,20 @@ void main() async {
   await setupLogger(directory: '${Platform.environment['HOME']}/Documents');
   await _configureMacosWindowUtils();
   setupLocator();
+  final serverResult = await LocalExcalidrawServer().start();
+  final excalidrawUrl = serverResult.match(
+    (error) =>
+        throw StateError('Unable to start the local Excalidraw server: $error'),
+    (url) => url,
+  );
 
-  runApp(const MyApp());
+  runApp(MyApp(excalidrawUrl: excalidrawUrl));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final Uri excalidrawUrl;
+
+  const MyApp({super.key, required this.excalidrawUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +50,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.macosDark,
       darkTheme: AppTheme.macosDark,
       themeMode: ThemeMode.dark,
-      home: const HomeScreen(),
+      home: HomeScreen(excalidrawUrl: excalidrawUrl),
     );
   }
 }

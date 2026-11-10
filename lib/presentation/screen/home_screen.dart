@@ -11,7 +11,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../widget/layout.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final Uri excalidrawUrl;
+
+  const HomeScreen({super.key, required this.excalidrawUrl});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -99,7 +101,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   onOpenDrawerFile: (path) {
                     context.read<HomeBloc>().add(OnOpenDrawerFile(path));
                   },
-                  child: ExcalidrawScreen(fileNotifier: _openedFileNotifier),
+                  child: ExcalidrawScreen(
+                    fileNotifier: _openedFileNotifier,
+                    excalidrawUrl: widget.excalidrawUrl,
+                  ),
                 );
               },
             );

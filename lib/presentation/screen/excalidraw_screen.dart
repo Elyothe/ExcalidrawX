@@ -9,8 +9,13 @@ import 'package:excalidrawx/presentation/webview/excalidraw_js_injector.dart';
 
 class ExcalidrawScreen extends StatefulWidget {
   final ValueNotifier<OpenedFile?> fileNotifier;
+  final Uri excalidrawUrl;
 
-  const ExcalidrawScreen({super.key, required this.fileNotifier});
+  const ExcalidrawScreen({
+    super.key,
+    required this.fileNotifier,
+    required this.excalidrawUrl,
+  });
 
   @override
   State<ExcalidrawScreen> createState() => _ExcalidrawScreenState();
@@ -64,7 +69,7 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
           },
         ),
       )
-      ..loadRequest(Uri.parse('https://excalidraw.com/'));
+      ..loadRequest(widget.excalidrawUrl);
     _jsInjector = ExcalidrawJsInjector(_controller);
   }
 

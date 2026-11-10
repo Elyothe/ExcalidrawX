@@ -9,7 +9,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # followed by an optional build number separated by a +.
 # Both the version and the builder number may be overridden in flutter
 # build by specifying --build-name and --build-number, respectively.
-# In Android, build-name is used as versionName while build-number used as versionCode.
+# In Android, build-na  me is used as versionName while build-number used as versionCode.
 # Read more about Android versioning at https://developer.android.com/studio/publish/versioning
 # In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
 # Read more about iOS versioning at
@@ -89,6 +89,20 @@ flutter:
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/excalidraw/
+    - assets/excalidraw/assets/
+    - assets/excalidraw/assets/locales/
+    - assets/excalidraw/fonts/
+    - assets/excalidraw/fonts/CascadiaCode/
+    - assets/excalidraw/fonts/ComicShanns/
+    - assets/excalidraw/fonts/Excalifont/
+    - assets/excalidraw/fonts/Virgil/
+    - assets/excalidraw/fonts/Lilita/
+    - assets/excalidraw/fonts/Nunito/
+    - assets/excalidraw/fonts/LiberationSans/
+    - assets/excalidraw/fonts/Xiaolai/
+    - assets/excalidraw/screenshots/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
