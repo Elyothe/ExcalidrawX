@@ -6,14 +6,12 @@ import 'package:excalidrawx/presentation/model/opened_file.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:excalidrawx/presentation/webview/excalidraw_js_injector.dart';
 
 class ExcalidrawScreen extends StatefulWidget {
   final ValueNotifier<OpenedFile?> fileNotifier;
 
-  const ExcalidrawScreen({
-    super.key,
-    required this.fileNotifier,
-  });
+  const ExcalidrawScreen({super.key, required this.fileNotifier});
 
   @override
   State<ExcalidrawScreen> createState() => _ExcalidrawScreenState();
@@ -22,6 +20,7 @@ class ExcalidrawScreen extends StatefulWidget {
 class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
   late final ExcalidrawBloc _excalidrawBloc;
   late final WebViewController _controller;
+  late final ExcalidrawJsInjector _jsInjector;
   bool _isLoading = true;
   String? _errorMessage;
   Timer? _autosaveTimer;
@@ -50,6 +49,8 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
               _isLoading = false;
             });
             _isPageLoaded = true;
+            _jsInjector.removeMainMenu();
+            _jsInjector.removeTopRightUi();
             if (_pendingElements != null) {
               _injectScene(_pendingElements!);
             }
@@ -64,6 +65,7 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
         ),
       )
       ..loadRequest(Uri.parse('https://excalidraw.com/'));
+    _jsInjector = ExcalidrawJsInjector(_controller);
   }
 
   @override
@@ -80,10 +82,9 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
 
     await _saveCurrentBeforeSwitch(openedFile);
 
-    _excalidrawBloc.add(OnOpenFile(
-      openedFile.path,
-      elements: openedFile.elements,
-    ));
+    _excalidrawBloc.add(
+      OnOpenFile(openedFile.path, elements: openedFile.elements),
+    );
   }
 
   Future<void> _saveCurrentBeforeSwitch(OpenedFile openedFile) async {
@@ -159,8 +160,7 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
           body: Stack(
             children: [
               WebViewWidget(controller: _controller),
-              if (_isLoading)
-                const Center(child: CircularProgressIndicator()),
+              if (_isLoading) const Center(child: CircularProgressIndicator()),
               if (_errorMessage != null)
                 Center(
                   child: Padding(
