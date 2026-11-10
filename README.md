@@ -65,6 +65,9 @@ fvm use
 # Install dependencies
 fvm flutter pub get
 
+# Generate localizations
+fvm flutter gen-l10n
+
 # Generate code (dart_mappable serialization, etc.)
 fvm dart run build_runner build --delete-conflicting-outputs
 
