@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:excalidrawx/presentation/bloc/excalidraw/excalidraw_bloc.dart';
 import 'package:excalidrawx/presentation/model/opened_file.dart';
 import 'package:flutter/material.dart';
@@ -51,6 +50,7 @@ class _ExcalidrawScreenState extends State<ExcalidrawScreen> {
             _isPageLoaded = true;
             _jsInjector.removeMainMenu();
             _jsInjector.removeTopRightUi();
+            _jsInjector.removeFooterRightUi();
             if (_pendingElements != null) {
               _injectScene(_pendingElements!);
             }
